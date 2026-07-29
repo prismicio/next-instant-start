@@ -41,6 +41,7 @@
 							},
 							"height": 1554,
 							"origin": {
+								"id": "4GFNZIWFldUGaLmn",
 								"url": "https://images.prismic.io/next-instant-start/4GFNZIWFldUGaLmn_hero_background.png?auto=format,compress",
 								"width": 2048,
 								"height": 1554
@@ -61,6 +62,7 @@
 							},
 							"height": 2188,
 							"origin": {
+								"id": "b4iIhYqCiQGPjp5-",
 								"url": "https://images.prismic.io/next-instant-start/b4iIhYqCiQGPjp5-_hero_interface.png?auto=format,compress",
 								"width": 4011,
 								"height": 2188
@@ -81,6 +83,7 @@
 							},
 							"height": 31,
 							"origin": {
+								"id": "QbtcTM6t3F5E9g-U",
 								"url": "https://next-instant-start.cdn.prismic.io/next-instant-start/QbtcTM6t3F5E9g-U_prismic-logo.svg",
 								"width": 119,
 								"height": 31
@@ -134,6 +137,7 @@
 									},
 									"height": 1480,
 									"origin": {
+										"id": "iYsXno6cDWbwVEUr",
 										"url": "https://images.prismic.io/next-instant-start/iYsXno6cDWbwVEUr_card_claude.png?auto=format,compress",
 										"width": 1515,
 										"height": 1480
@@ -167,6 +171,7 @@
 									},
 									"height": 1480,
 									"origin": {
+										"id": "ltfOgaC35QTc4w7j",
 										"url": "https://images.prismic.io/next-instant-start/ltfOgaC35QTc4w7j_card_yours.png?auto=format,compress",
 										"width": 1515,
 										"height": 1480
@@ -200,6 +205,7 @@
 									},
 									"height": 1480,
 									"origin": {
+										"id": "lvXgZO1eMknSOqtM",
 										"url": "https://images.prismic.io/next-instant-start/lvXgZO1eMknSOqtM_card_docs.png?auto=format,compress",
 										"width": 1515,
 										"height": 1480
