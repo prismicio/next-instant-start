@@ -1,0 +1,11 @@
+{
+	"repositoryName": "next-instant-start",
+	"documentAPIEndpoint": "https://next-instant-start.cdn.prismic.io/api/v2",
+	"libraries": ["./src/slices"],
+	"routes": [
+		{
+			"type": "homepage",
+			"path": "/"
+		}
+	]
+}

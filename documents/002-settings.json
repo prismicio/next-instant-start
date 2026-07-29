@@ -1,0 +1,12 @@
+{
+	"title": "Settings",
+	"custom_type_id": "settings",
+	"locale": "en-us",
+	"data": {
+		"site_title": "Prismic - Welcome to your New Repository",
+		"site_title_TYPE": "Text",
+		"site_title_POSITION": 0,
+		"uids_INTERNAL": [],
+		"slugs_INTERNAL": ["settings"]
+	}
+}

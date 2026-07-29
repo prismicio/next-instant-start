@@ -1,0 +1,308 @@
+{
+	"title": "Home",
+	"custom_type_id": "homepage",
+	"locale": "en-us",
+	"data": {
+		"meta_description": "Edit this page, publish it, and use it to familiarize yourself with the page builder, slices, and previews.",
+		"meta_title": "Welcome to your New Repository",
+		"slices": [
+			{
+				"key": "hero$f1d2892a-8b73-4102-ab34-d572fc2ef699",
+				"value": {
+					"primary": {
+						"description": [
+							{
+								"type": "paragraph",
+								"content": {
+									"text": "This is a real page. Edit it, publish it, and use it to familiarize yourself with the page builder, slice, and previews.",
+									"spans": []
+								},
+								"direction": "ltr"
+							}
+						],
+						"headline": [
+							{
+								"type": "heading1",
+								"content": {
+									"text": "Welcome to your New Repository",
+									"spans": []
+								},
+								"direction": "ltr"
+							}
+						],
+						"background_image": {
+							"edit": {
+								"zoom": 1,
+								"crop": {
+									"x": 0,
+									"y": 0
+								},
+								"background": "transparent"
+							},
+							"height": 1554,
+							"origin": {
+								"url": "https://images.prismic.io/next-instant-start/4GFNZIWFldUGaLmn_hero_background.png?auto=format,compress",
+								"width": 2048,
+								"height": 1554
+							},
+							"width": 2048,
+							"provider": "imgix",
+							"url": "https://images.prismic.io/next-instant-start/4GFNZIWFldUGaLmn_hero_background.png?auto=format,compress",
+							"alt": ""
+						},
+						"interface_image": {
+							"edit": {
+								"zoom": 1,
+								"crop": {
+									"x": 0,
+									"y": 0
+								},
+								"background": "transparent"
+							},
+							"height": 2188,
+							"origin": {
+								"url": "https://images.prismic.io/next-instant-start/b4iIhYqCiQGPjp5-_hero_interface.png?auto=format,compress",
+								"width": 4011,
+								"height": 2188
+							},
+							"width": 4011,
+							"provider": "imgix",
+							"url": "https://images.prismic.io/next-instant-start/b4iIhYqCiQGPjp5-_hero_interface.png?auto=format,compress",
+							"alt": "Prismic page builder interface preview"
+						},
+						"logo": {
+							"edit": {
+								"background": "transparent",
+								"zoom": 1,
+								"crop": {
+									"x": 0,
+									"y": 0
+								}
+							},
+							"height": 31,
+							"origin": {
+								"url": "https://next-instant-start.cdn.prismic.io/next-instant-start/QbtcTM6t3F5E9g-U_prismic-logo.svg",
+								"width": 119,
+								"height": 31
+							},
+							"width": 119,
+							"provider": "imgix",
+							"url": "https://next-instant-start.cdn.prismic.io/next-instant-start/QbtcTM6t3F5E9g-U_prismic-logo.svg",
+							"alt": ""
+						}
+					},
+					"items": [],
+					"variation": "default"
+				}
+			},
+			{
+				"key": "card_grid$b7ba0d6c-385c-46b4-b423-b4632ca56af1",
+				"value": {
+					"primary": {
+						"cards": [
+							{
+								"title": "Work from ChatGPT or Claude",
+								"description": [
+									{
+										"type": "paragraph",
+										"content": {
+											"text": "Prismic MCP lets your AI assistant create pages, run bulk edits, and manage content for you.",
+											"spans": [
+												{
+													"type": "hyperlink",
+													"start": 0,
+													"end": 11,
+													"data": {
+														"kind": "web",
+														"url": "https://prismic.io/docs/mcp",
+														"target": "_blank"
+													}
+												}
+											]
+										},
+										"direction": "ltr"
+									}
+								],
+								"image": {
+									"edit": {
+										"zoom": 1,
+										"crop": {
+											"x": 0,
+											"y": 0
+										},
+										"background": "transparent"
+									},
+									"height": 1480,
+									"origin": {
+										"url": "https://images.prismic.io/next-instant-start/iYsXno6cDWbwVEUr_card_claude.png?auto=format,compress",
+										"width": 1515,
+										"height": 1480
+									},
+									"width": 1515,
+									"provider": "imgix",
+									"url": "https://images.prismic.io/next-instant-start/iYsXno6cDWbwVEUr_card_claude.png?auto=format,compress",
+									"alt": "Work from ChatGPT or Claude"
+								}
+							},
+							{
+								"title": "Make it yours",
+								"description": [
+									{
+										"type": "paragraph",
+										"content": {
+											"text": "Download the code behind this website, iterate locally with Prismic's CLI and agent skill, host it anywhere.",
+											"spans": []
+										},
+										"direction": "ltr"
+									}
+								],
+								"image": {
+									"edit": {
+										"zoom": 1,
+										"crop": {
+											"x": 0,
+											"y": 0
+										},
+										"background": "transparent"
+									},
+									"height": 1480,
+									"origin": {
+										"url": "https://images.prismic.io/next-instant-start/ltfOgaC35QTc4w7j_card_yours.png?auto=format,compress",
+										"width": 1515,
+										"height": 1480
+									},
+									"width": 1515,
+									"provider": "imgix",
+									"url": "https://images.prismic.io/next-instant-start/ltfOgaC35QTc4w7j_card_yours.png?auto=format,compress",
+									"alt": "Make it yours"
+								}
+							},
+							{
+								"title": "Developer documentation",
+								"description": [
+									{
+										"type": "paragraph",
+										"content": {
+											"text": "Integration guides for Next.js, Nuxt, and SvelteKit, plus everything else.",
+											"spans": []
+										},
+										"direction": "ltr"
+									}
+								],
+								"image": {
+									"edit": {
+										"zoom": 1,
+										"crop": {
+											"x": 0,
+											"y": 0
+										},
+										"background": "transparent"
+									},
+									"height": 1480,
+									"origin": {
+										"url": "https://images.prismic.io/next-instant-start/lvXgZO1eMknSOqtM_card_docs.png?auto=format,compress",
+										"width": 1515,
+										"height": 1480
+									},
+									"width": 1515,
+									"provider": "imgix",
+									"url": "https://images.prismic.io/next-instant-start/lvXgZO1eMknSOqtM_card_docs.png?auto=format,compress",
+									"alt": "Developer documentation"
+								}
+							}
+						]
+					},
+					"items": [],
+					"variation": "default"
+				}
+			},
+			{
+				"key": "resource_links$10d83056-78d7-4f1d-9058-956da31d3dca",
+				"value": {
+					"primary": {
+						"cta_heading": "Learn how to use Prismic",
+						"cta_link": {
+							"key": "01b67f82-da37-4405-a608-404f5d0ed52b",
+							"text": "Get a demo",
+							"kind": "web",
+							"url": "https://prismic.io/demo"
+						},
+						"resources": [
+							{
+								"title": "Help Center",
+								"description": "Find guides and answers to help you build, manage, and publish with Prismic.",
+								"link": {
+									"key": "62568d4a-34cd-4033-be02-232b680e6060",
+									"text": "Read more",
+									"kind": "web",
+									"url": "https://prismic.io/docs"
+								}
+							},
+							{
+								"title": "Case Studies",
+								"description": "See how leading teams use Prismic to ship faster and create better digital experiences.",
+								"link": {
+									"key": "6159608d-c63f-4515-abd8-2ba674bf7b62",
+									"text": "Read more",
+									"kind": "web",
+									"url": "https://prismic.io/customers"
+								}
+							}
+						]
+					},
+					"items": [],
+					"variation": "default"
+				}
+			}
+		],
+		"slices.card_grid$b7ba0d6c-385c-46b4-b423-b4632ca56af1.variations.default.primary.cards.0_KEY": "072331b5-a70b-469c-a249-ca9f070a60d3",
+		"slices.card_grid$b7ba0d6c-385c-46b4-b423-b4632ca56af1.variations.default.primary.cards.1_KEY": "a6c8e041-d67c-43d8-a288-4e698459d7d2",
+		"slices.card_grid$b7ba0d6c-385c-46b4-b423-b4632ca56af1.variations.default.primary.cards.2_KEY": "00f54043-eb77-4dac-a934-de24aca7876a",
+		"slices.resource_links$10d83056-78d7-4f1d-9058-956da31d3dca.variations.default.primary.resources.0_KEY": "d27738e9-1207-47c8-adb7-bd4fc96573c9",
+		"slices.resource_links$10d83056-78d7-4f1d-9058-956da31d3dca.variations.default.primary.resources.1_KEY": "5a34c15a-84ee-479d-897f-c6591f0909b3",
+		"slices_TYPE": "Slices",
+		"slices_POSITION": 0,
+		"slices.hero_TYPE": "SharedSlice",
+		"slices.hero_POSITION": 1,
+		"slices.hero.variations.default.primary.headline_TYPE": "StructuredText",
+		"slices.hero.variations.default.primary.headline_POSITION": 2,
+		"slices.hero.variations.default.primary.description_TYPE": "StructuredText",
+		"slices.hero.variations.default.primary.description_POSITION": 3,
+		"slices.hero.variations.default.primary.background_image_TYPE": "Image",
+		"slices.hero.variations.default.primary.background_image_POSITION": 4,
+		"slices.hero.variations.default.primary.interface_image_TYPE": "Image",
+		"slices.hero.variations.default.primary.interface_image_POSITION": 5,
+		"slices.hero.variations.default.primary.logo_TYPE": "Image",
+		"slices.hero.variations.default.primary.logo_POSITION": 6,
+		"slices.resource_links_TYPE": "SharedSlice",
+		"slices.resource_links_POSITION": 7,
+		"slices.resource_links.variations.default.primary.resources_TYPE": "Group",
+		"slices.resource_links.variations.default.primary.resources_POSITION": 8,
+		"slices.resource_links.variations.default.primary.resources.title_TYPE": "Text",
+		"slices.resource_links.variations.default.primary.resources.title_POSITION": 9,
+		"slices.resource_links.variations.default.primary.resources.description_TYPE": "Text",
+		"slices.resource_links.variations.default.primary.resources.description_POSITION": 10,
+		"slices.resource_links.variations.default.primary.resources.link_TYPE": "Link",
+		"slices.resource_links.variations.default.primary.resources.link_POSITION": 11,
+		"slices.resource_links.variations.default.primary.cta_heading_TYPE": "Text",
+		"slices.resource_links.variations.default.primary.cta_heading_POSITION": 12,
+		"slices.resource_links.variations.default.primary.cta_link_TYPE": "Link",
+		"slices.resource_links.variations.default.primary.cta_link_POSITION": 13,
+		"slices.card_grid_TYPE": "SharedSlice",
+		"slices.card_grid_POSITION": 14,
+		"slices.card_grid.variations.default.primary.cards_TYPE": "Group",
+		"slices.card_grid.variations.default.primary.cards_POSITION": 15,
+		"slices.card_grid.variations.default.primary.cards.title_TYPE": "Text",
+		"slices.card_grid.variations.default.primary.cards.title_POSITION": 16,
+		"slices.card_grid.variations.default.primary.cards.description_TYPE": "StructuredText",
+		"slices.card_grid.variations.default.primary.cards.description_POSITION": 17,
+		"slices.card_grid.variations.default.primary.cards.image_TYPE": "Image",
+		"slices.card_grid.variations.default.primary.cards.image_POSITION": 18,
+		"meta_title_TYPE": "Text",
+		"meta_title_POSITION": 19,
+		"meta_description_TYPE": "Text",
+		"meta_description_POSITION": 20,
+		"uids_INTERNAL": [],
+		"slugs_INTERNAL": ["homepage"]
+	}
+}
