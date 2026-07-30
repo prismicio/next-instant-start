@@ -35,7 +35,6 @@ export default function Hero(props: HeroProps) {
 					<PrismicNextImage
 						field={slice.primary.background_image}
 						className="size-full object-cover"
-						sizes="100vw"
 						fallbackAlt=""
 					/>
 				:	<div className="size-full bg-[#ededed]" aria-hidden="true" />}
@@ -60,11 +59,10 @@ export default function Hero(props: HeroProps) {
 					<PrismicNextImage
 						field={slice.primary.interface_image}
 						className="size-full object-cover"
-						sizes="(min-width: 1040px) 1003px, calc(100vw - 32px)"
 						fallbackAlt=""
 					/>
 				:	<div
-						className="aspect-[1066/554] w-full bg-[#ededed]"
+						className="aspect-1066/554 w-full bg-[#ededed]"
 						aria-hidden="true"
 					/>
 				}

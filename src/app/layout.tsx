@@ -1,5 +1,4 @@
 import "@/app/globals.css"
-import { Footer } from "@/components/Footer"
 import { repositoryName } from "@/prismicio"
 import { PrismicPreview } from "@prismicio/next"
 import { Inter } from "next/font/google"
@@ -19,7 +18,6 @@ export default function RootLayout({
 		<html lang="en" className={inter.variable}>
 			<body className="font-sans bg-white text-[#0d0d0d] antialiased selection:bg-black selection:text-white">
 				<main className="min-h-screen">{children}</main>
-				<Footer />
 				<PrismicPreview repositoryName={repositoryName} />
 			</body>
 		</html>

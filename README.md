@@ -59,9 +59,8 @@ To edit the content of this project, go to [prismic.io/dashboard](https://prismi
 Open the **Homepage** document to edit and rearrange its slices. Use the
 **Hero** slice to update the logo and introductory content, the **Card Grid**
 slice to update its cards, and the **Resource Links** slice to update its links.
-Use the **Footer** document to update copyright, cookie, and social links. The
-**Settings** document is available for site-wide fields as you extend the
-starter.
+Use the Homepage's static fields to update metadata, copyright, cookie, and
+social links.
 
 ### Preview documents
 
@@ -88,9 +87,9 @@ There are two steps to rendering content from Prismic in your Next.js project:
 Here are some of the files in your project that you can edit:
 
 - `src/prismicio.ts` - This file configures `@prismicio/client` and exports useful API helpers.
-- `src/app/layout.tsx` - This is your layout component, which includes content preview configuration and the footer.
-- `src/app/page.tsx` - This is the app homepage. It queries and renders the Homepage document from the Prismic API.
-- `src/components/Footer.tsx` - This component queries and renders the Footer document.
+- `src/app/layout.tsx` - This is your layout component, which includes content preview configuration.
+- `src/app/page.tsx` - This is the app homepage. It queries and renders the Homepage document and footer fields from the Prismic API.
+- `src/components/Footer.tsx` - This component renders the Homepage document's footer fields.
 - `src/slices/*/index.tsx` - Each slice has a component that you can customize.
 
 These are important files that you should leave as-is:

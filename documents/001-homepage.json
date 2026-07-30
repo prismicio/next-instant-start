@@ -1,10 +1,46 @@
 {
-	"title": "Home",
+	"title": "Welcome to your New Repository",
 	"custom_type_id": "homepage",
 	"locale": "en-us",
 	"data": {
 		"meta_description": "Edit this page, publish it, and use it to familiarize yourself with the page builder, slices, and previews.",
 		"meta_title": "Welcome to your New Repository",
+		"footer_copyright_text": "Prismic © 2015–2026",
+		"footer_cookies_link": {
+			"kind": "web",
+			"url": "https://prismic.io",
+			"text": "Manage cookies"
+		},
+		"footer_social_links": [
+			{
+				"key": "5e05ab99-abba-4829-a125-51296444ddd3",
+				"kind": "web",
+				"url": "https://x.com/prismicio",
+				"text": "X",
+				"variant": "X"
+			},
+			{
+				"key": "83bf1fe9-4b09-474f-adda-8efa3000ed82",
+				"kind": "web",
+				"url": "https://www.youtube.com/@prismic",
+				"text": "YouTube",
+				"variant": "YouTube"
+			},
+			{
+				"key": "332dc30b-c5f4-4502-8aa2-a45605e7797c",
+				"kind": "web",
+				"url": "https://github.com/prismicio",
+				"text": "GitHub",
+				"variant": "GitHub"
+			},
+			{
+				"key": "ce7201f9-cd32-4829-a1e0-b82ffe38a12b",
+				"kind": "web",
+				"url": "https://www.linkedin.com/company/prismic-io/",
+				"text": "LinkedIn",
+				"variant": "LinkedIn"
+			}
+		],
 		"slices": [
 			{
 				"key": "hero$f1d2892a-8b73-4102-ab34-d572fc2ef699",
@@ -308,6 +344,12 @@
 		"meta_title_POSITION": 19,
 		"meta_description_TYPE": "Text",
 		"meta_description_POSITION": 20,
+		"footer_copyright_text_TYPE": "Text",
+		"footer_copyright_text_POSITION": 21,
+		"footer_cookies_link_TYPE": "Link",
+		"footer_cookies_link_POSITION": 22,
+		"footer_social_links_TYPE": "Repeatable.Link",
+		"footer_social_links_POSITION": 23,
 		"uids_INTERNAL": [],
 		"slugs_INTERNAL": ["homepage"]
 	}

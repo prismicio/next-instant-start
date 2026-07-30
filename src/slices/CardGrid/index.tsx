@@ -49,14 +49,13 @@ function CardImage(props: CardImageProps) {
 		return (
 			<PrismicNextImage
 				field={card.image}
-				className="aspect-[379/370] w-full object-cover"
-				sizes="(min-width: 1296px) 379px, (min-width: 1024px) calc((100vw - 160px) / 3), (min-width: 768px) calc((100vw - 80px) / 2), calc(100vw - 48px)"
+				className="aspect-379/370 w-full object-cover"
 				fallbackAlt=""
 			/>
 		)
 	}
 
 	return (
-		<div className="aspect-[379/370] w-full bg-[#ededed]" aria-hidden="true" />
+		<div className="aspect-379/370 w-full bg-[#ededed]" aria-hidden="true" />
 	)
 }
