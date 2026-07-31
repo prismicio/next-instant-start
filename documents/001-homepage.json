@@ -85,7 +85,7 @@
 							"width": 2048,
 							"provider": "imgix",
 							"url": "https://images.prismic.io/next-instant-start/4GFNZIWFldUGaLmn_hero_background.png?auto=format,compress",
-							"alt": ""
+							"alt": "Impressionist painting of a small boat on calm water at sunrise, with soft blue and orange reflections."
 						},
 						"interface_image": {
 							"edit": {
@@ -106,7 +106,7 @@
 							"width": 4011,
 							"provider": "imgix",
 							"url": "https://images.prismic.io/next-instant-start/b4iIhYqCiQGPjp5-_hero_interface.png?auto=format,compress",
-							"alt": "Prismic page builder interface preview"
+							"alt": "A screenshot of the Prismic AI live editing screen rendering a page with a list of slices on the left and a chat with the AI content editor on the right."
 						},
 						"logo": {
 							"edit": {
@@ -127,7 +127,7 @@
 							"width": 119,
 							"provider": "imgix",
 							"url": "https://next-instant-start.cdn.prismic.io/next-instant-start/QbtcTM6t3F5E9g-U_prismic-logo.svg",
-							"alt": ""
+							"alt": "Prismic's logo."
 						}
 					},
 					"items": [],
@@ -181,7 +181,7 @@
 									"width": 1515,
 									"provider": "imgix",
 									"url": "https://images.prismic.io/next-instant-start/iYsXno6cDWbwVEUr_card_claude.png?auto=format,compress",
-									"alt": "Work from ChatGPT or Claude"
+									"alt": "An example chat with Claude."
 								}
 							},
 							{
@@ -215,7 +215,7 @@
 									"width": 1515,
 									"provider": "imgix",
 									"url": "https://images.prismic.io/next-instant-start/ltfOgaC35QTc4w7j_card_yours.png?auto=format,compress",
-									"alt": "Make it yours"
+									"alt": "An interface showing an \"Export my website to Prismic\" prompt over a website preview with a large image."
 								}
 							},
 							{
@@ -249,7 +249,7 @@
 									"width": 1515,
 									"provider": "imgix",
 									"url": "https://images.prismic.io/next-instant-start/lvXgZO1eMknSOqtM_card_docs.png?auto=format,compress",
-									"alt": "Developer documentation"
+									"alt": "An example snippet of React and TypeScript code inside an app/page.tsx file."
 								}
 							}
 						]
