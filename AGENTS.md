@@ -4,13 +4,15 @@ Prismic + Next.js App Router instant-start starter. Slice-based pages, preview r
 
 ## Setup
 
-Don't try to setup manually. Always run first:
+When this project comes from Prismic Instant Start, use the repository name
+provided by Page Builder:
 
 ```sh
-npm run init
+npx prismic@latest init --repo <repository-name>
 ```
 
-It installs dependencies, checks Prismic login, and sets up local simulator URL for live preview.
+This connects the project, installs dependencies, syncs compatible models, and
+sets up local previews. Do not edit `prismic.config.json` manually.
 
 ## Prismic work
 

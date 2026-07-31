@@ -9,8 +9,7 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "eslint .",
-		"format": "prettier --write .",
-		"init": "node scripts/init.js"
+		"format": "prettier --write ."
 	},
 	"dependencies": {
 		"@prismicio/client": "^7.21.8",

@@ -16,14 +16,18 @@ To start a new project using this starter:
 3. Select the **Instant Start** starter.
 4. Fill out your repository details and continue with the steps given in Prismic.
 
-After Instant Start finishes creating your repository, download and extract the
-generated project. Then install its dependencies:
+After Instant Start finishes creating your repository, Page Builder provides
+commands containing the repository name and pinned starter revision:
 
 ```sh
-npm install
+npx degit prismicio/next-instant-start#<revision> <repository-name>
+cd <repository-name>
+npx prismic@latest init --repo <repository-name>
 ```
 
-Start the development server:
+The init command connects the project, installs dependencies, synchronizes
+compatible models, and configures local previews. Then start the development
+server:
 
 ```sh
 npm run dev
