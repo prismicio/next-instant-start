@@ -6,15 +6,6 @@ OVERLAY_DIR="$(cd "$(dirname "$0")" && pwd)"
 PATCHED_SRC="${OVERLAY_DIR}/patched-src/src"
 PATCH_FILE="$(mktemp)"
 
-OVERLAY_FILES=(
-	lib/repository.ts
-	prismicio.ts
-	app/layout.tsx
-	app/api/preview/[repository]/route.ts
-	app/hosted-preview/[repository]/layout.tsx
-	app/hosted-preview/[repository]/page.tsx
-)
-
 cd "${ROOT}"
 
 cleanup() {
@@ -27,13 +18,25 @@ restore_src_from_git() {
 	git clean -fd src/ >/dev/null 2>&1 || true
 }
 
-stage_new_overlay_files() {
-	for relative_path in "${OVERLAY_FILES[@]}"; do
+copy_overlay_files() {
+	while IFS= read -r -d '' source_file; do
+		relative_path="${source_file#"${PATCHED_SRC}/"}"
 		target_file="src/${relative_path}"
-		if [[ -f "${target_file}" ]] && ! git ls-files --error-unmatch "${target_file}" >/dev/null 2>&1; then
+
+		mkdir -p "$(dirname "${target_file}")"
+		cp "${source_file}" "${target_file}"
+	done < <(find "${PATCHED_SRC}" -type f -print0 | sort -z)
+}
+
+stage_new_overlay_files() {
+	while IFS= read -r -d '' source_file; do
+		relative_path="${source_file#"${PATCHED_SRC}/"}"
+		target_file="src/${relative_path}"
+
+		if ! git ls-files --error-unmatch "${target_file}" >/dev/null 2>&1; then
 			git add -N "${target_file}"
 		fi
-	done
+	done < <(find "${PATCHED_SRC}" -type f -print0 | sort -z)
 }
 
 if [[ ! -d "${PATCHED_SRC}" ]]; then
@@ -41,20 +44,13 @@ if [[ ! -d "${PATCHED_SRC}" ]]; then
 	exit 1
 fi
 
+if [[ -z "$(find "${PATCHED_SRC}" -type f -print -quit)" ]]; then
+	echo "No overlay files found under ${PATCHED_SRC}" >&2
+	exit 1
+fi
+
 if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-	for relative_path in "${OVERLAY_FILES[@]}"; do
-		source_file="${PATCHED_SRC}/${relative_path}"
-		target_file="src/${relative_path}"
-
-		if [[ ! -f "${source_file}" ]]; then
-			echo "Missing overlay source file: ${source_file}" >&2
-			exit 1
-		fi
-
-		mkdir -p "$(dirname "${target_file}")"
-		cp "${source_file}" "${target_file}"
-	done
-
+	copy_overlay_files
 	stage_new_overlay_files
 	git diff HEAD -- src/ >"${PATCH_FILE}"
 	git reset HEAD src/ >/dev/null 2>&1 || true
@@ -77,18 +73,7 @@ if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 		exit 1
 	fi
 else
-	for relative_path in "${OVERLAY_FILES[@]}"; do
-		source_file="${PATCHED_SRC}/${relative_path}"
-		target_file="src/${relative_path}"
-
-		if [[ ! -f "${source_file}" ]]; then
-			echo "Missing overlay source file: ${source_file}" >&2
-			exit 1
-		fi
-
-		mkdir -p "$(dirname "${target_file}")"
-		cp "${source_file}" "${target_file}"
-	done
+	copy_overlay_files
 fi
 
 COMMIT_SHA="$(git rev-parse HEAD 2>/dev/null || echo unknown)"

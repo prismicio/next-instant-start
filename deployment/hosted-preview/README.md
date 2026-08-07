@@ -29,8 +29,8 @@ Canonical starter routes stay unchanged:
 
 | File | Purpose |
 | --- | --- |
-| `patched-src/` | **Single source of truth** — edit these files |
-| `apply.sh` | Generates an ephemeral patch from `patched-src/` vs `src/`, then applies it |
+| `patched-src/src/` | **Single source of truth** — mirrors `src/`; add or edit only the files the deployment needs |
+| `apply.sh` | Copies everything under `patched-src/src/` into `src/`, generates an ephemeral patch, then applies it |
 | `verify-deployment.sh` | Asserts `src/` has no hosted preview runtime |
 
 There is no committed `.patch` file. `apply.sh` derives the diff at build time.
@@ -55,10 +55,11 @@ A conflict happens when public `src/` changes on `main` but `patched-src/` still
 
 At build time, `apply.sh`:
 
-1. Computes `git diff HEAD -- src/` between clean `src/` and the overlay files from `patched-src/`
-2. Runs `git apply --check` on that ephemeral patch
-3. **Fails closed** if hunks do not apply cleanly
-4. Applies the patch only when the check passes
+1. Copies every file under `patched-src/src/` into `src/`
+2. Computes `git diff HEAD -- src/` against the clean starter tree
+3. Runs `git apply --check` on that ephemeral patch
+4. **Fails closed** if hunks do not apply cleanly
+5. Applies the patch only when the check passes
 
 There is no automatic merge. Conflicts are resolved by updating `patched-src/`.
 
