@@ -9,6 +9,7 @@ PATCH_FILE="$(mktemp)"
 OVERLAY_FILES=(
 	lib/repository.ts
 	prismicio.ts
+	app/layout.tsx
 	app/api/preview/[repository]/route.ts
 	app/hosted-preview/[repository]/layout.tsx
 	app/hosted-preview/[repository]/page.tsx

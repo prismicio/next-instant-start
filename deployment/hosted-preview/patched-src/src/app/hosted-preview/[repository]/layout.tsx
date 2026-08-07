@@ -1,5 +1,7 @@
 import { PrismicPreview } from "@prismicio/next"
 
+export const dynamic = "force-dynamic"
+
 type LayoutProps = {
 	children: React.ReactNode
 	params: Promise<{

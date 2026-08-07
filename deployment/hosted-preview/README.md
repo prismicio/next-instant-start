@@ -18,6 +18,8 @@ flowchart LR
 4. After enabling Draft Mode, the user is redirected to `/hosted-preview/abc12345`.
 5. The hosted preview page fetches and renders that repository's content with `cache: "no-store"`.
 
+The overlay also removes root-level `<PrismicPreview>` (which targets `prismic.config.json`'s repository) so tenant pages only mount one toolbar for the previewed repository. Hosted preview routes use `dynamic = "force-dynamic"` so Draft Mode is not baked into a static shell.
+
 Canonical starter routes stay unchanged:
 
 - `/api/preview` — local single-repository preview

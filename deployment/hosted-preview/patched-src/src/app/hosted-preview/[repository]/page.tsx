@@ -10,6 +10,8 @@ import { components } from "@/slices"
 
 import type { HomepageDocument } from "../../../../prismicio-types"
 
+export const dynamic = "force-dynamic"
+
 type PageProps = {
 	params: Promise<{
 		repository: string
