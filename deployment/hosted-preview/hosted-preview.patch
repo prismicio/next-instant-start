@@ -1,0 +1,239 @@
+diff --git a/src/app/api/preview/[repository]/route.ts b/src/app/api/preview/[repository]/route.ts
+new file mode 100644
+index 0000000..93d7742
+--- /dev/null
++++ b/src/app/api/preview/[repository]/route.ts
+@@ -0,0 +1,36 @@
++import { redirectToPreviewURL } from "@prismicio/next"
++import { NextRequest, NextResponse } from "next/server"
++
++import {
++	isValidRepositoryLabel,
++	previewTokenMatchesRepository,
++} from "@/lib/repository"
++import { createClient } from "@/prismicio"
++
++type RouteParams = {
++	params: Promise<{
++		repository: string
++	}>
++}
++
++export async function GET(request: NextRequest, { params }: RouteParams) {
++	const { repository } = await params
++
++	if (!isValidRepositoryLabel(repository)) {
++		return new NextResponse("Repository not found", { status: 404 })
++	}
++
++	const previewToken = request.nextUrl.searchParams.get("token")
++	if (
++		previewToken &&
++		!previewTokenMatchesRepository(previewToken, repository)
++	) {
++		return new NextResponse("Preview token does not match repository", {
++			status: 403,
++		})
++	}
++
++	const client = createClient({}, repository)
++
++	return await redirectToPreviewURL({ client, request })
++}
+diff --git a/src/app/hosted-preview/[repository]/layout.tsx b/src/app/hosted-preview/[repository]/layout.tsx
+new file mode 100644
+index 0000000..5a06241
+--- /dev/null
++++ b/src/app/hosted-preview/[repository]/layout.tsx
+@@ -0,0 +1,24 @@
++import { PrismicPreview } from "@prismicio/next"
++
++export const dynamic = "force-dynamic"
++
++type LayoutProps = {
++	children: React.ReactNode
++	params: Promise<{
++		repository: string
++	}>
++}
++
++export default async function HostedPreviewLayout(props: LayoutProps) {
++	const { repository } = await props.params
++
++	return (
++		<>
++			{props.children}
++			<PrismicPreview
++				repositoryName={repository}
++				updatePreviewURL={`/api/preview/${repository}`}
++			/>
++		</>
++	)
++}
+diff --git a/src/app/hosted-preview/[repository]/page.tsx b/src/app/hosted-preview/[repository]/page.tsx
+new file mode 100644
+index 0000000..6f407eb
+--- /dev/null
++++ b/src/app/hosted-preview/[repository]/page.tsx
+@@ -0,0 +1,53 @@
++import { type Metadata } from "next"
++import { notFound } from "next/navigation"
++
++import { SliceZone } from "@prismicio/react"
++
++import { Footer } from "@/components/Footer"
++import { isValidRepositoryLabel } from "@/lib/repository"
++import { createClient } from "@/prismicio"
++import { components } from "@/slices"
++
++import type { HomepageDocument } from "../../../../prismicio-types"
++
++export const dynamic = "force-dynamic"
++
++type PageProps = {
++	params: Promise<{
++		repository: string
++	}>
++}
++
++export default async function HostedPreviewPage(props: PageProps) {
++	const { repository } = await props.params
++
++	if (!isValidRepositoryLabel(repository)) {
++		notFound()
++	}
++
++	const client = createClient({}, repository)
++	const page = await client.getSingle<HomepageDocument>("homepage")
++
++	return (
++		<>
++			<SliceZone slices={page.data.slices} components={components} />
++			<Footer data={page.data} />
++		</>
++	)
++}
++
++export async function generateMetadata(props: PageProps): Promise<Metadata> {
++	const { repository } = await props.params
++
++	if (!isValidRepositoryLabel(repository)) {
++		return {}
++	}
++
++	const client = createClient({}, repository)
++	const page = await client.getSingle<HomepageDocument>("homepage")
++
++	return {
++		title: page.data.meta_title,
++		description: page.data.meta_description,
++	}
++}
+diff --git a/src/app/layout.tsx b/src/app/layout.tsx
+index 4e6b6bb..5f005ee 100644
+--- a/src/app/layout.tsx
++++ b/src/app/layout.tsx
+@@ -1,6 +1,4 @@
+ import "@/app/globals.css"
+-import { repositoryName } from "@/prismicio"
+-import { PrismicPreview } from "@prismicio/next"
+ import { Inter } from "next/font/google"
+ 
+ const inter = Inter({
+@@ -18,7 +16,6 @@ export default function RootLayout({
+ 		<html lang="en" className={inter.variable}>
+ 			<body className="font-sans bg-white text-[#0d0d0d] antialiased selection:bg-black selection:text-white">
+ 				<main className="min-h-screen">{children}</main>
+-				<PrismicPreview repositoryName={repositoryName} />
+ 			</body>
+ 		</html>
+ 	)
+diff --git a/src/lib/repository.ts b/src/lib/repository.ts
+new file mode 100644
+index 0000000..0014196
+--- /dev/null
++++ b/src/lib/repository.ts
+@@ -0,0 +1,31 @@
++export const INSTANT_START_REPOSITORY_LABEL_PATTERN = /^[a-z0-9]{8}$/
++
++export function isValidRepositoryLabel(label: string): boolean {
++	return INSTANT_START_REPOSITORY_LABEL_PATTERN.test(label)
++}
++
++export function extractRepositoryFromPreviewToken(
++	previewToken: string,
++): string | undefined {
++	try {
++		const url = new URL(decodeURIComponent(previewToken))
++		const hostname = url.hostname
++		const dotIndex = hostname.indexOf(".")
++		if (dotIndex <= 0) {
++			return undefined
++		}
++
++		return hostname.slice(0, dotIndex)
++	} catch {
++		return undefined
++	}
++}
++
++export function previewTokenMatchesRepository(
++	previewToken: string,
++	repositoryName: string,
++): boolean {
++	return (
++		extractRepositoryFromPreviewToken(previewToken) === repositoryName
++	)
++}
+diff --git a/src/prismicio.ts b/src/prismicio.ts
+index 266a841..bef90b0 100644
+--- a/src/prismicio.ts
++++ b/src/prismicio.ts
+@@ -18,19 +18,42 @@ export const repositoryName = prismicConfig.repositoryName
+  * query content from the Prismic API.
+  *
+  * @param config - Configuration for the Prismic client.
++ * @param tenantRepositoryName - Optional Instant Start tenant repository name.
+  */
+-export const createClient = (config: ClientConfig = {}) => {
++export const createClient = (
++	config: ClientConfig = {},
++	tenantRepositoryName?: string,
++) => {
+ 	const typedPrismicConfig = prismicConfig as PrismicConfig
++	const selectedRepositoryName = tenantRepositoryName ?? repositoryName
++	const isHostedPreview = tenantRepositoryName !== undefined
+ 
+-	const staticConfig: ClientConfig = { routes: typedPrismicConfig.routes }
+-	if (typedPrismicConfig.documentAPIEndpoint) {
++	const routes =
++		isHostedPreview ?
++			typedPrismicConfig.routes.map((route) =>
++				route.type === "homepage" ?
++					{
++						...route,
++						path: `/hosted-preview/${tenantRepositoryName}`,
++					}
++				:	route,
++			)
++		:	typedPrismicConfig.routes
++
++	const staticConfig: ClientConfig = { routes }
++	if (
++		typedPrismicConfig.documentAPIEndpoint &&
++		selectedRepositoryName === repositoryName &&
++		!isHostedPreview
++	) {
+ 		staticConfig.documentAPIEndpoint = typedPrismicConfig.documentAPIEndpoint
+ 	}
+ 
+-	const client = baseCreateClient(repositoryName, {
++	const client = baseCreateClient(selectedRepositoryName, {
+ 		...staticConfig,
+ 		fetchOptions:
+-			process.env.NODE_ENV === "production" ?
++			isHostedPreview ? { cache: "no-store" }
++			: process.env.NODE_ENV === "production" ?
+ 				{ next: { tags: ["prismic"] }, cache: "force-cache" }
+ 			:	{ next: { revalidate: 5 } },
+ 		...config,

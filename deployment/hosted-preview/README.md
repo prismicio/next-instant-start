@@ -1,6 +1,6 @@
 # Instant Start hosted preview overlay
 
-Prismic-managed path-based hosted preview for Instant Start. The public starter keeps a clean `src/` tree; this directory holds deployment-only sources applied before Vercel builds the shared starter project.
+Prismic-managed path-based hosted preview for Instant Start. The public starter keeps a clean `src/` tree; this directory holds a committed patch applied before Vercel builds the shared starter project.
 
 ## Architecture
 
@@ -18,7 +18,7 @@ flowchart LR
 4. After enabling Draft Mode, the user is redirected to `/hosted-preview/abc12345`.
 5. The hosted preview page fetches and renders that repository's content with `cache: "no-store"`.
 
-The overlay also removes root-level `<PrismicPreview>` (which targets `prismic.config.json`'s repository) so tenant pages only mount one toolbar for the previewed repository. Hosted preview routes use `dynamic = "force-dynamic"` so Draft Mode is not baked into a static shell.
+The overlay removes root-level `<PrismicPreview>` (which targets `prismic.config.json`'s repository) so tenant pages only mount one toolbar for the previewed repository. Hosted preview routes use `dynamic = "force-dynamic"` so Draft Mode is not baked into a static shell.
 
 Canonical starter routes stay unchanged:
 
@@ -29,11 +29,10 @@ Canonical starter routes stay unchanged:
 
 | File | Purpose |
 | --- | --- |
-| `patched-src/src/` | **Single source of truth** — mirrors `src/`; add or edit only the files the deployment needs |
-| `apply.sh` | Copies everything under `patched-src/src/` into `src/`, generates an ephemeral patch, then applies it |
+| `hosted-preview.patch` | **Single source of truth** — git patch applied to `src/` at build time |
+| `apply.sh` | Applies `hosted-preview.patch` with conflict checking |
+| `generate-patch.sh` | Captures current `src/` overlay changes into `hosted-preview.patch` |
 | `verify-deployment.sh` | Asserts `src/` has no hosted preview runtime |
-
-There is no committed `.patch` file. `apply.sh` derives the diff at build time.
 
 ## Vercel configuration
 
@@ -49,19 +48,30 @@ Do **not** commit a project-level `vercel.json` with this build command. User cl
 
 No custom DNS or environment variables are required for the path-based feasibility setup.
 
+## Updating hosted preview logic
+
+1. Edit the hosted preview files directly under `src/`.
+2. Run `./deployment/hosted-preview/generate-patch.sh .`
+3. Commit `deployment/hosted-preview/hosted-preview.patch`.
+
+`generate-patch.sh` writes the patch and restores `src/` to the clean starter tree so hosted preview runtime is not committed on `main`.
+
 ## Conflicts
 
-A conflict happens when public `src/` changes on `main` but `patched-src/` still reflects the old base — for example, someone refactors `src/prismicio.ts` without updating `patched-src/src/prismicio.ts`.
+A conflict happens when public `src/` changes on `main` but `hosted-preview.patch` still reflects the old base — for example, someone refactors `src/prismicio.ts` without regenerating the patch.
 
 At build time, `apply.sh`:
 
-1. Copies every file under `patched-src/src/` into `src/`
-2. Computes `git diff HEAD -- src/` against the clean starter tree
-3. Runs `git apply --check` on that ephemeral patch
-4. **Fails closed** if hunks do not apply cleanly
-5. Applies the patch only when the check passes
+1. Runs `git apply --check` on `hosted-preview.patch`
+2. **Fails closed** if hunks do not apply cleanly
+3. Applies the patch only when the check passes
 
-There is no automatic merge. Conflicts are resolved by updating `patched-src/`.
+Regenerate the patch after resolving conflicts locally:
+
+```sh
+# Make hosted preview changes in src/, then:
+./deployment/hosted-preview/generate-patch.sh .
+```
 
 ## Rollback
 
@@ -74,7 +84,7 @@ There is no automatic merge. Conflicts are resolved by updating `patched-src/`.
 # Verify the public starter stays clean
 ./deployment/hosted-preview/verify-deployment.sh
 
-# Apply the overlay locally (mutates src/)
+# Apply the patch locally (mutates src/)
 ./deployment/hosted-preview/apply.sh .
 ```
 
@@ -91,10 +101,3 @@ When a user runs `prismic init --repo <name>` on a cloned starter, the CLI:
 - Removes hosted preview URLs from the repository settings
 - Deletes `deployment/hosted-preview/` from the local project
 - Configures the local Development preview
-
-## Updating hosted preview logic
-
-1. Edit files under `patched-src/src/` only.
-2. Run `./deployment/hosted-preview/verify-deployment.sh` locally or rely on the GitHub workflow.
-
-No manual patch regeneration is required.
