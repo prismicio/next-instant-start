@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT="${1:-.}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PATCH_FILE="${SCRIPT_DIR}/hosted-preview.patch"
+PATCH_FILE="${SCRIPT_DIR}/instant-preview.patch"
 
 cd "${ROOT}"
 

@@ -40,11 +40,11 @@ index 0000000..93d7742
 +
 +	return await redirectToPreviewURL({ client, request })
 +}
-diff --git a/src/app/hosted-preview/[repository]/layout.tsx b/src/app/hosted-preview/[repository]/layout.tsx
+diff --git a/src/app/instant-preview/[repository]/layout.tsx b/src/app/instant-preview/[repository]/layout.tsx
 new file mode 100644
-index 0000000..5a06241
+index 0000000..b0277f3
 --- /dev/null
-+++ b/src/app/hosted-preview/[repository]/layout.tsx
++++ b/src/app/instant-preview/[repository]/layout.tsx
 @@ -0,0 +1,24 @@
 +import { PrismicPreview } from "@prismicio/next"
 +
@@ -57,7 +57,7 @@ index 0000000..5a06241
 +	}>
 +}
 +
-+export default async function HostedPreviewLayout(props: LayoutProps) {
++export default async function InstantPreviewLayout(props: LayoutProps) {
 +	const { repository } = await props.params
 +
 +	return (
@@ -70,11 +70,11 @@ index 0000000..5a06241
 +		</>
 +	)
 +}
-diff --git a/src/app/hosted-preview/[repository]/page.tsx b/src/app/hosted-preview/[repository]/page.tsx
+diff --git a/src/app/instant-preview/[repository]/page.tsx b/src/app/instant-preview/[repository]/page.tsx
 new file mode 100644
-index 0000000..6f407eb
+index 0000000..b2649c7
 --- /dev/null
-+++ b/src/app/hosted-preview/[repository]/page.tsx
++++ b/src/app/instant-preview/[repository]/page.tsx
 @@ -0,0 +1,53 @@
 +import { type Metadata } from "next"
 +import { notFound } from "next/navigation"
@@ -96,7 +96,7 @@ index 0000000..6f407eb
 +	}>
 +}
 +
-+export default async function HostedPreviewPage(props: PageProps) {
++export default async function InstantPreviewPage(props: PageProps) {
 +	const { repository } = await props.params
 +
 +	if (!isValidRepositoryLabel(repository)) {
@@ -186,7 +186,7 @@ index 0000000..0014196
 +	)
 +}
 diff --git a/src/prismicio.ts b/src/prismicio.ts
-index 266a841..bef90b0 100644
+index 266a841..c797154 100644
 --- a/src/prismicio.ts
 +++ b/src/prismicio.ts
 @@ -18,19 +18,42 @@ export const repositoryName = prismicConfig.repositoryName
@@ -202,17 +202,17 @@ index 266a841..bef90b0 100644
 +) => {
  	const typedPrismicConfig = prismicConfig as PrismicConfig
 +	const selectedRepositoryName = tenantRepositoryName ?? repositoryName
-+	const isHostedPreview = tenantRepositoryName !== undefined
++	const isInstantPreview = tenantRepositoryName !== undefined
  
 -	const staticConfig: ClientConfig = { routes: typedPrismicConfig.routes }
 -	if (typedPrismicConfig.documentAPIEndpoint) {
 +	const routes =
-+		isHostedPreview ?
++		isInstantPreview ?
 +			typedPrismicConfig.routes.map((route) =>
 +				route.type === "homepage" ?
 +					{
 +						...route,
-+						path: `/hosted-preview/${tenantRepositoryName}`,
++						path: `/instant-preview/${tenantRepositoryName}`,
 +					}
 +				:	route,
 +			)
@@ -222,7 +222,7 @@ index 266a841..bef90b0 100644
 +	if (
 +		typedPrismicConfig.documentAPIEndpoint &&
 +		selectedRepositoryName === repositoryName &&
-+		!isHostedPreview
++		!isInstantPreview
 +	) {
  		staticConfig.documentAPIEndpoint = typedPrismicConfig.documentAPIEndpoint
  	}
@@ -232,7 +232,7 @@ index 266a841..bef90b0 100644
  		...staticConfig,
  		fetchOptions:
 -			process.env.NODE_ENV === "production" ?
-+			isHostedPreview ? { cache: "no-store" }
++			isInstantPreview ? { cache: "no-store" }
 +			: process.env.NODE_ENV === "production" ?
  				{ next: { tags: ["prismic"] }, cache: "force-cache" }
  			:	{ next: { revalidate: 5 } },

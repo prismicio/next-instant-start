@@ -9,13 +9,13 @@ if [[ -f src/lib/repository.ts ]]; then
 	exit 1
 fi
 
-if [[ -d src/app/hosted-preview ]]; then
-	echo "src/app/hosted-preview must not exist in the public starter." >&2
+if [[ -d src/app/instant-preview ]]; then
+	echo "src/app/instant-preview must not exist in the public starter." >&2
 	exit 1
 fi
 
-if rg -q 'hosted-preview/\[repository\]|previewTokenMatchesRepository|isValidRepositoryLabel' src/; then
-	echo "Hosted preview runtime detected under src/." >&2
+if rg -q 'instant-preview/\[repository\]|previewTokenMatchesRepository|isValidRepositoryLabel' src/; then
+	echo "Instant preview runtime detected under src/." >&2
 	exit 1
 fi
 

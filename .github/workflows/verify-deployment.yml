@@ -20,13 +20,13 @@ jobs:
           cache: npm
 
       - name: Verify clean starter
-        run: bash ./deployment/hosted-preview/verify-deployment.sh
+        run: bash ./deployment/instant-preview/patch-verify.sh
 
       - name: Install starter dependencies
         run: npm ci
 
-      - name: Apply hosted preview overlay
-        run: bash ./deployment/hosted-preview/apply.sh .
+      - name: Apply instant preview patch
+        run: bash ./deployment/instant-preview/patch-apply.sh .
 
       - name: Lint patched starter
         run: npm run lint
