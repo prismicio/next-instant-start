@@ -1,10 +1,13 @@
 diff --git a/src/app/api/preview/[repository]/route.ts b/src/app/api/preview/[repository]/route.ts
 new file mode 100644
-index 0000000..93d7742
+index 0000000..73d5473
 --- /dev/null
 +++ b/src/app/api/preview/[repository]/route.ts
-@@ -0,0 +1,36 @@
+@@ -0,0 +1,71 @@
++import { cookie as prismicCookie } from "@prismicio/client"
 +import { redirectToPreviewURL } from "@prismicio/next"
++import { cookies, draftMode } from "next/headers"
++import { redirect } from "next/navigation"
 +import { NextRequest, NextResponse } from "next/server"
 +
 +import {
@@ -26,6 +29,8 @@ index 0000000..93d7742
 +		return new NextResponse("Repository not found", { status: 404 })
 +	}
 +
++	const prismicHost = request.nextUrl.searchParams.get("prismicHost") ?? undefined
++
 +	const previewToken = request.nextUrl.searchParams.get("token")
 +	if (
 +		previewToken &&
@@ -36,17 +41,48 @@ index 0000000..93d7742
 +		})
 +	}
 +
-+	const client = createClient({}, repository)
++	const client = createClient({}, repository, prismicHost)
 +
-+	return await redirectToPreviewURL({ client, request })
++	if (!prismicHost) {
++		return redirectToPreviewURL({ client, request })
++	}
++
++	const documentID = request.nextUrl.searchParams.get("documentId") ?? undefined
++	const cookieJar = await cookies()
++
++	if (previewToken) {
++		cookieJar.set(prismicCookie.preview, previewToken)
++	}
++
++	cookieJar.set(`prismicHost-${repository}`, prismicHost, {
++		path: `/instant-preview/${repository}`,
++		httpOnly: true,
++		sameSite: "lax",
++	})
++
++	let previewURL = await client.resolvePreviewURL({
++		documentID,
++		previewToken: previewToken ?? undefined,
++		defaultURL: "/",
++	})
++
++	const redirectUrl = new URL(previewURL, request.url)
++	redirectUrl.searchParams.set("prismicHost", prismicHost)
++	previewURL = `${redirectUrl.pathname}${redirectUrl.search}`
++
++	const draft = await draftMode()
++	draft.enable()
++
++	redirect(previewURL)
 +}
 diff --git a/src/app/instant-preview/[repository]/layout.tsx b/src/app/instant-preview/[repository]/layout.tsx
 new file mode 100644
-index 0000000..b0277f3
+index 0000000..935517c
 --- /dev/null
 +++ b/src/app/instant-preview/[repository]/layout.tsx
-@@ -0,0 +1,24 @@
+@@ -0,0 +1,32 @@
 +import { PrismicPreview } from "@prismicio/next"
++import { cookies } from "next/headers"
 +
 +export const dynamic = "force-dynamic"
 +
@@ -59,24 +95,32 @@ index 0000000..b0277f3
 +
 +export default async function InstantPreviewLayout(props: LayoutProps) {
 +	const { repository } = await props.params
++	const cookieStore = await cookies()
++	const prismicHost = cookieStore.get(`prismicHost-${repository}`)?.value
++
++	const updatePreviewURL =
++		prismicHost ?
++			`/api/preview/${repository}?prismicHost=${encodeURIComponent(prismicHost)}`
++		:	`/api/preview/${repository}`
 +
 +	return (
 +		<>
 +			{props.children}
 +			<PrismicPreview
 +				repositoryName={repository}
-+				updatePreviewURL={`/api/preview/${repository}`}
++				updatePreviewURL={updatePreviewURL}
 +			/>
 +		</>
 +	)
 +}
 diff --git a/src/app/instant-preview/[repository]/page.tsx b/src/app/instant-preview/[repository]/page.tsx
 new file mode 100644
-index 0000000..b2649c7
+index 0000000..445e908
 --- /dev/null
 +++ b/src/app/instant-preview/[repository]/page.tsx
-@@ -0,0 +1,53 @@
+@@ -0,0 +1,73 @@
 +import { type Metadata } from "next"
++import { cookies } from "next/headers"
 +import { notFound } from "next/navigation"
 +
 +import { SliceZone } from "@prismicio/react"
@@ -94,16 +138,33 @@ index 0000000..b2649c7
 +	params: Promise<{
 +		repository: string
 +	}>
++	searchParams: Promise<{
++		prismicHost?: string
++	}>
++}
++
++async function getPrismicHost(
++	repository: string,
++	searchParams: { prismicHost?: string },
++) {
++	if (searchParams.prismicHost) {
++		return searchParams.prismicHost
++	}
++
++	const cookieStore = await cookies()
++	return cookieStore.get(`prismicHost-${repository}`)?.value
 +}
 +
 +export default async function InstantPreviewPage(props: PageProps) {
 +	const { repository } = await props.params
++	const searchParams = await props.searchParams
 +
 +	if (!isValidRepositoryLabel(repository)) {
 +		notFound()
 +	}
 +
-+	const client = createClient({}, repository)
++	const prismicHost = await getPrismicHost(repository, searchParams)
++	const client = createClient({}, repository, prismicHost)
 +	const page = await client.getSingle<HomepageDocument>("homepage")
 +
 +	return (
@@ -116,12 +177,14 @@ index 0000000..b2649c7
 +
 +export async function generateMetadata(props: PageProps): Promise<Metadata> {
 +	const { repository } = await props.params
++	const searchParams = await props.searchParams
 +
 +	if (!isValidRepositoryLabel(repository)) {
 +		return {}
 +	}
 +
-+	const client = createClient({}, repository)
++	const prismicHost = await getPrismicHost(repository, searchParams)
++	const client = createClient({}, repository, prismicHost)
 +	const page = await client.getSingle<HomepageDocument>("homepage")
 +
 +	return {
@@ -150,14 +213,12 @@ index 4e6b6bb..5f005ee 100644
  	)
 diff --git a/src/lib/repository.ts b/src/lib/repository.ts
 new file mode 100644
-index 0000000..0014196
+index 0000000..b558f72
 --- /dev/null
 +++ b/src/lib/repository.ts
-@@ -0,0 +1,31 @@
-+export const INSTANT_START_REPOSITORY_LABEL_PATTERN = /^[a-z0-9]{8}$/
-+
+@@ -0,0 +1,29 @@
 +export function isValidRepositoryLabel(label: string): boolean {
-+	return INSTANT_START_REPOSITORY_LABEL_PATTERN.test(label)
++	return /^[a-z0-9]{8}$/.test(label)
 +}
 +
 +export function extractRepositoryFromPreviewToken(
@@ -186,19 +247,21 @@ index 0000000..0014196
 +	)
 +}
 diff --git a/src/prismicio.ts b/src/prismicio.ts
-index 266a841..c797154 100644
+index 266a841..208e5e5 100644
 --- a/src/prismicio.ts
 +++ b/src/prismicio.ts
-@@ -18,19 +18,42 @@ export const repositoryName = prismicConfig.repositoryName
+@@ -18,19 +18,45 @@ export const repositoryName = prismicConfig.repositoryName
   * query content from the Prismic API.
   *
   * @param config - Configuration for the Prismic client.
 + * @param tenantRepositoryName - Optional Instant Start tenant repository name.
++ * @param prismicHost - Optional CDN host suffix for tenant Content API requests.
   */
 -export const createClient = (config: ClientConfig = {}) => {
 +export const createClient = (
 +	config: ClientConfig = {},
 +	tenantRepositoryName?: string,
++	prismicHost?: string,
 +) => {
  	const typedPrismicConfig = prismicConfig as PrismicConfig
 +	const selectedRepositoryName = tenantRepositoryName ?? repositoryName
@@ -206,17 +269,14 @@ index 266a841..c797154 100644
  
 -	const staticConfig: ClientConfig = { routes: typedPrismicConfig.routes }
 -	if (typedPrismicConfig.documentAPIEndpoint) {
-+	const routes =
-+		isInstantPreview ?
-+			typedPrismicConfig.routes.map((route) =>
-+				route.type === "homepage" ?
-+					{
-+						...route,
-+						path: `/instant-preview/${tenantRepositoryName}`,
-+					}
-+				:	route,
-+			)
-+		:	typedPrismicConfig.routes
++  const routes = isInstantPreview
++    ? typedPrismicConfig.routes.map((route) => {
++        if (route.type === "homepage") {
++          return { ...route, path: `/instant-preview/${tenantRepositoryName}` };
++        }
++        return route;
++      })
++    : typedPrismicConfig.routes;
 +
 +	const staticConfig: ClientConfig = { routes }
 +	if (
@@ -228,6 +288,10 @@ index 266a841..c797154 100644
  	}
  
 -	const client = baseCreateClient(repositoryName, {
++	if (isInstantPreview && prismicHost) {
++		staticConfig.documentAPIEndpoint = `https://${selectedRepositoryName}.cdn.${prismicHost}/api/v2`
++	}
++
 +	const client = baseCreateClient(selectedRepositoryName, {
  		...staticConfig,
  		fetchOptions:
