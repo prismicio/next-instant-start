@@ -5,8 +5,8 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "${ROOT}"
 
 instant_preview_paths=(
-	"src/prismicio.tenant.ts"
-	"src/app/[tenant]"
+	"src/lib/instant-preview.ts"
+	"src/app/api/preview/[repository]"
 )
 
 for path in "${instant_preview_paths[@]}"; do
