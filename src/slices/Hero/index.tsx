@@ -15,7 +15,7 @@ export default function Hero(props: HeroProps) {
 			className="relative h-[760px] overflow-hidden bg-white sm:h-[860px] lg:h-[1024px]"
 		>
 			<Link
-				href="/"
+				href="https://prismic.io"
 				className="absolute left-1/2 top-8 z-20 inline-flex h-[31px] w-[119px] -translate-x-1/2"
 				aria-label="Home"
 			>
