@@ -1,6 +1,5 @@
 import {
 	createClient as baseCreateClient,
-	RequestInitLike,
 	type ClientConfig,
 } from "@prismicio/client"
 import { enableAutoPreviews } from "@prismicio/next"
@@ -28,16 +27,12 @@ export const createClient = (config: ClientConfig = {}) => {
 		staticConfig.documentAPIEndpoint = typedPrismicConfig.documentAPIEndpoint
 	}
 
-	let fetchOptions: RequestInitLike
-	if (process.env.NODE_ENV === "production") {
-		fetchOptions = { next: { tags: ["prismic"] }, cache: "force-cache" }
-	} else {
-		fetchOptions = { next: { revalidate: 5 } }
-	}
-
 	const client = baseCreateClient(repositoryName, {
 		...staticConfig,
-		fetchOptions,
+		fetchOptions:
+			process.env.NODE_ENV === "production" ?
+				{ next: { tags: ["prismic"] }, cache: "force-cache" }
+			:	{ next: { revalidate: 5 } },
 		...config,
 	})
 

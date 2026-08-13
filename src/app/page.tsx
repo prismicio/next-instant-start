@@ -6,11 +6,9 @@ import { Footer } from "@/components/Footer"
 import { createClient } from "@/prismicio"
 import { components } from "@/slices"
 
-import type { HomepageDocument } from "../../prismicio-types"
-
 export default async function Home() {
 	const client = createClient()
-	const page = await client.getSingle<HomepageDocument>("homepage")
+	const page = await client.getSingle("homepage")
 
 	return (
 		<>
@@ -22,7 +20,7 @@ export default async function Home() {
 
 export async function generateMetadata(): Promise<Metadata> {
 	const client = createClient()
-	const page = await client.getSingle<HomepageDocument>("homepage")
+	const page = await client.getSingle("homepage")
 
 	return {
 		title: page.data.meta_title,
