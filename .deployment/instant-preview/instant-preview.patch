@@ -1,9 +1,9 @@
 diff --git a/src/app/StarterPrismicPreview.tsx b/src/app/StarterPrismicPreview.tsx
 new file mode 100644
-index 0000000..0c00d0c
+index 0000000..fb7b94b
 --- /dev/null
 +++ b/src/app/StarterPrismicPreview.tsx
-@@ -0,0 +1,14 @@
+@@ -0,0 +1,15 @@
 +"use client"
 +
 +import { repositoryName } from "@/prismicio"
@@ -14,6 +14,7 @@ index 0000000..0c00d0c
 +	const pathname = usePathname()
 +	// quick solution to allow root and tenant preview at the same time
 +	const firstSegment = pathname.split("/").filter(Boolean)[0]
++	console.log('firstSegment', firstSegment)
 +	if (firstSegment && firstSegment !== "slice-simulator") return null
 +
 +	return <PrismicPreview repositoryName={repositoryName} />
