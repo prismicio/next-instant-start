@@ -129,10 +129,10 @@ index 4e6b6bb..5f005ee 100644
  	)
 diff --git a/src/prismicio.tenant.ts b/src/prismicio.tenant.ts
 new file mode 100644
-index 0000000..f37bbdc
+index 0000000..1aec9a9
 --- /dev/null
 +++ b/src/prismicio.tenant.ts
-@@ -0,0 +1,42 @@
+@@ -0,0 +1,44 @@
 +import {
 +	createClient as baseCreateClient,
 +	type ClientConfig,
@@ -166,7 +166,9 @@ index 0000000..f37bbdc
 +		fetch: (url, init) => {
 +			const u = new URL(url)
 +			u.searchParams.set("x-instant-start", tenant)
-+			return fetch(u, init)
++			const taggedUrl = u.toString()
++			console.log("[instant-start cdn]", taggedUrl)
++			return fetch(taggedUrl, init)
 +		},
 +		...config,
 +	})
