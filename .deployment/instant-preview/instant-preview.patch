@@ -40,62 +40,45 @@ index 0000000..0e9c80c
 +		</>
 +	)
 +}
-diff --git a/src/app/page.tsx b/src/app/[tenant]/page.tsx
-similarity index 56%
-rename from src/app/page.tsx
-rename to src/app/[tenant]/page.tsx
-index 4f649d3..edc85b4 100644
---- a/src/app/page.tsx
+diff --git a/src/app/[tenant]/page.tsx b/src/app/[tenant]/page.tsx
+new file mode 100644
+index 0000000..edc85b4
+--- /dev/null
 +++ b/src/app/[tenant]/page.tsx
-@@ -3,11 +3,12 @@ import { type Metadata } from "next"
- import { SliceZone } from "@prismicio/react"
- 
- import { Footer } from "@/components/Footer"
--import { createClient } from "@/prismicio"
+@@ -0,0 +1,33 @@
++import { type Metadata } from "next"
++
++import { SliceZone } from "@prismicio/react"
++
++import { Footer } from "@/components/Footer"
 +import { createClient } from "@/prismicio.tenant"
- import { components } from "@/slices"
- 
--export default async function Home() {
--	const client = createClient()
++import { components } from "@/slices"
++
 +export default async function Home(props: PageProps<"/[tenant]">) {
 +	const { tenant } = await props.params
 +	const client = createClient(tenant)
- 	const page = await client.getSingle("homepage")
- 
- 	return (
-@@ -18,8 +19,11 @@ export default async function Home() {
- 	)
- }
- 
--export async function generateMetadata(): Promise<Metadata> {
--	const client = createClient()
++	const page = await client.getSingle("homepage")
++
++	return (
++		<>
++			<SliceZone slices={page.data.slices} components={components} />
++			<Footer data={page.data} />
++		</>
++	)
++}
++
 +export async function generateMetadata(
 +	props: PageProps<"/[tenant]">,
 +): Promise<Metadata> {
 +	const { tenant } = await props.params
 +	const client = createClient(tenant)
- 	const page = await client.getSingle("homepage")
- 
- 	return {
-diff --git a/src/app/layout.tsx b/src/app/layout.tsx
-index 4e6b6bb..5f005ee 100644
---- a/src/app/layout.tsx
-+++ b/src/app/layout.tsx
-@@ -1,6 +1,4 @@
- import "@/app/globals.css"
--import { repositoryName } from "@/prismicio"
--import { PrismicPreview } from "@prismicio/next"
- import { Inter } from "next/font/google"
- 
- const inter = Inter({
-@@ -18,7 +16,6 @@ export default function RootLayout({
- 		<html lang="en" className={inter.variable}>
- 			<body className="font-sans bg-white text-[#0d0d0d] antialiased selection:bg-black selection:text-white">
- 				<main className="min-h-screen">{children}</main>
--				<PrismicPreview repositoryName={repositoryName} />
- 			</body>
- 		</html>
- 	)
++	const page = await client.getSingle("homepage")
++
++	return {
++		title: page.data.meta_title,
++		description: page.data.meta_description,
++	}
++}
 diff --git a/src/prismicio.tenant.ts b/src/prismicio.tenant.ts
 new file mode 100644
 index 0000000..f37bbdc
