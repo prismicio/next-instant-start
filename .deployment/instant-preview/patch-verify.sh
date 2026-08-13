@@ -7,6 +7,7 @@ cd "${ROOT}"
 instant_preview_paths=(
 	"src/prismicio.tenant.ts"
 	"src/app/[tenant]"
+	"src/app/StarterPrismicPreview.tsx"
 )
 
 for path in "${instant_preview_paths[@]}"; do

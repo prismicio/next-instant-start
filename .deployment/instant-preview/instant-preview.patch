@@ -1,3 +1,23 @@
+diff --git a/src/app/StarterPrismicPreview.tsx b/src/app/StarterPrismicPreview.tsx
+new file mode 100644
+index 0000000..0c00d0c
+--- /dev/null
++++ b/src/app/StarterPrismicPreview.tsx
+@@ -0,0 +1,14 @@
++"use client"
++
++import { repositoryName } from "@/prismicio"
++import { PrismicPreview } from "@prismicio/next"
++import { usePathname } from "next/navigation"
++
++export function StarterPrismicPreview() {
++	const pathname = usePathname()
++	// quick solution to allow root and tenant preview at the same time
++	const firstSegment = pathname.split("/").filter(Boolean)[0]
++	if (firstSegment && firstSegment !== "slice-simulator") return null
++
++	return <PrismicPreview repositoryName={repositoryName} />
++}
 diff --git a/src/app/[tenant]/api/preview/route.ts b/src/app/[tenant]/api/preview/route.ts
 new file mode 100644
 index 0000000..4fe8e68
@@ -79,6 +99,27 @@ index 0000000..edc85b4
 +		description: page.data.meta_description,
 +	}
 +}
+diff --git a/src/app/layout.tsx b/src/app/layout.tsx
+index 4e6b6bb..0bea5be 100644
+--- a/src/app/layout.tsx
++++ b/src/app/layout.tsx
+@@ -1,6 +1,5 @@
+ import "@/app/globals.css"
+-import { repositoryName } from "@/prismicio"
+-import { PrismicPreview } from "@prismicio/next"
++import { StarterPrismicPreview } from "@/app/StarterPrismicPreview"
+ import { Inter } from "next/font/google"
+ 
+ const inter = Inter({
+@@ -18,7 +17,7 @@ export default function RootLayout({
+ 		<html lang="en" className={inter.variable}>
+ 			<body className="font-sans bg-white text-[#0d0d0d] antialiased selection:bg-black selection:text-white">
+ 				<main className="min-h-screen">{children}</main>
+-				<PrismicPreview repositoryName={repositoryName} />
++				<StarterPrismicPreview />
+ 			</body>
+ 		</html>
+ 	)
 diff --git a/src/prismicio.tenant.ts b/src/prismicio.tenant.ts
 new file mode 100644
 index 0000000..f37bbdc
