@@ -1,0 +1,146 @@
+diff --git a/src/app/[tenant]/api/preview/route.ts b/src/app/[tenant]/api/preview/route.ts
+new file mode 100644
+index 0000000..4fe8e68
+--- /dev/null
++++ b/src/app/[tenant]/api/preview/route.ts
+@@ -0,0 +1,14 @@
++import { redirectToPreviewURL } from "@prismicio/next"
++import { NextRequest } from "next/server"
++
++import { createClient } from "@/prismicio.tenant"
++
++export async function GET(
++	request: NextRequest,
++	context: RouteContext<"/[tenant]/api/preview">,
++) {
++	const { tenant } = await context.params
++	const client = createClient(tenant)
++
++	return await redirectToPreviewURL({ client, request })
++}
+diff --git a/src/app/[tenant]/layout.tsx b/src/app/[tenant]/layout.tsx
+new file mode 100644
+index 0000000..0e9c80c
+--- /dev/null
++++ b/src/app/[tenant]/layout.tsx
+@@ -0,0 +1,16 @@
++import { PrismicPreview } from "@prismicio/next"
++
++export default async function TenantLayout(props: LayoutProps<"/[tenant]">) {
++	const { tenant } = await props.params
++	const [repo] = tenant.split("~")
++
++	return (
++		<>
++			{props.children}
++			<PrismicPreview
++				repositoryName={repo}
++				updatePreviewURL={`/${tenant}/api/preview`}
++			/>
++		</>
++	)
++}
+diff --git a/src/app/page.tsx b/src/app/[tenant]/page.tsx
+similarity index 56%
+rename from src/app/page.tsx
+rename to src/app/[tenant]/page.tsx
+index 4f649d3..edc85b4 100644
+--- a/src/app/page.tsx
++++ b/src/app/[tenant]/page.tsx
+@@ -3,11 +3,12 @@ import { type Metadata } from "next"
+ import { SliceZone } from "@prismicio/react"
+ 
+ import { Footer } from "@/components/Footer"
+-import { createClient } from "@/prismicio"
++import { createClient } from "@/prismicio.tenant"
+ import { components } from "@/slices"
+ 
+-export default async function Home() {
+-	const client = createClient()
++export default async function Home(props: PageProps<"/[tenant]">) {
++	const { tenant } = await props.params
++	const client = createClient(tenant)
+ 	const page = await client.getSingle("homepage")
+ 
+ 	return (
+@@ -18,8 +19,11 @@ export default async function Home() {
+ 	)
+ }
+ 
+-export async function generateMetadata(): Promise<Metadata> {
+-	const client = createClient()
++export async function generateMetadata(
++	props: PageProps<"/[tenant]">,
++): Promise<Metadata> {
++	const { tenant } = await props.params
++	const client = createClient(tenant)
+ 	const page = await client.getSingle("homepage")
+ 
+ 	return {
+diff --git a/src/app/layout.tsx b/src/app/layout.tsx
+index 4e6b6bb..5f005ee 100644
+--- a/src/app/layout.tsx
++++ b/src/app/layout.tsx
+@@ -1,6 +1,4 @@
+ import "@/app/globals.css"
+-import { repositoryName } from "@/prismicio"
+-import { PrismicPreview } from "@prismicio/next"
+ import { Inter } from "next/font/google"
+ 
+ const inter = Inter({
+@@ -18,7 +16,6 @@ export default function RootLayout({
+ 		<html lang="en" className={inter.variable}>
+ 			<body className="font-sans bg-white text-[#0d0d0d] antialiased selection:bg-black selection:text-white">
+ 				<main className="min-h-screen">{children}</main>
+-				<PrismicPreview repositoryName={repositoryName} />
+ 			</body>
+ 		</html>
+ 	)
+diff --git a/src/prismicio.tenant.ts b/src/prismicio.tenant.ts
+new file mode 100644
+index 0000000..f37bbdc
+--- /dev/null
++++ b/src/prismicio.tenant.ts
+@@ -0,0 +1,42 @@
++import {
++	createClient as baseCreateClient,
++	type ClientConfig,
++} from "@prismicio/client"
++import { enableAutoPreviews } from "@prismicio/next"
++import { notFound } from "next/navigation"
++
++import prismicConfig from "../prismic.config.json"
++
++const ALLOWED_HOSTS = [
++	"prismic.io",
++	"wroom.io",
++	"wroom.test",
++	"dev-tools-wroom.com",
++	"devops-wroom.com",
++	"marketing-tools-wroom.com",
++	"platform-wroom.com",
++]
++
++export const createClient = (tenant: string, config: ClientConfig = {}) => {
++	const [repo, ...rest] = tenant.split("~")
++	const host = rest.join(".") || "prismic.io"
++	if (!repo || !ALLOWED_HOSTS.includes(host)) notFound()
++
++	const client = baseCreateClient(repo, {
++		documentAPIEndpoint: `https://${repo}.cdn.${host}/api/v2`,
++		routes: prismicConfig.routes.map((route) => ({
++			...route,
++			path: route.path === "/" ? `/${tenant}` : `/${tenant}${route.path}`,
++		})),
++		fetch: (url, init) => {
++			const u = new URL(url)
++			u.searchParams.set("x-instant-start", tenant)
++			return fetch(u, init)
++		},
++		...config,
++	})
++
++	enableAutoPreviews({ client })
++
++	return client
++}
