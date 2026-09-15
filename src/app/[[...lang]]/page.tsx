@@ -1,5 +1,6 @@
 import { type Metadata } from "next"
 
+import { NotFoundError } from "@prismicio/client"
 import { SliceZone } from "@prismicio/react"
 import { notFound } from "next/navigation"
 
@@ -9,6 +10,23 @@ import { localeSegments, locales, resolveLocaleFromSegments } from "@/lib/locale
 import { createClient } from "@/prismicio"
 import { components } from "@/slices"
 
+/**
+ * Fetches the `homepage` singleton for a given locale, treating a locale
+ * that has not been translated yet as a 404 rather than a build-time crash.
+ * `generateStaticParams` declares a static path for every configured
+ * locale (see `src/lib/locales.ts`), but a locale can be added there before
+ * its `homepage` document has actually been translated in Prismic; without
+ * this, that untranslated locale would fail the entire static export.
+ */
+async function getHomepage(client: ReturnType<typeof createClient>, lang: string) {
+	try {
+		return await client.getSingle("homepage", { lang })
+	} catch (error) {
+		if (error instanceof NotFoundError) notFound()
+		throw error
+	}
+}
+
 export default async function Home(props: PageProps<"/[[...lang]]">) {
 	const { lang } = await props.params
 
@@ -16,7 +34,7 @@ export default async function Home(props: PageProps<"/[[...lang]]">) {
 	if (!locale) notFound()
 
 	const client = createClient()
-	const page = await client.getSingle("homepage", { lang: locale.code })
+	const page = await getHomepage(client, locale.code)
 
 	return (
 		<>
@@ -36,7 +54,7 @@ export async function generateMetadata(
 	if (!locale) notFound()
 
 	const client = createClient()
-	const page = await client.getSingle("homepage", { lang: locale.code })
+	const page = await getHomepage(client, locale.code)
 
 	return {
 		title: page.data.meta_title,
