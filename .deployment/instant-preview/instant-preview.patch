@@ -1,41 +1,126 @@
-diff --git a/src/app/(starter)/layout.tsx b/src/app/(starter)/layout.tsx
-new file mode 100644
-index 0000000..9cd56a7
---- /dev/null
-+++ b/src/app/(starter)/layout.tsx
-@@ -0,0 +1,15 @@
-+import { repositoryName } from "@/prismicio"
-+import { PrismicPreview } from "@prismicio/next"
-+
-+export default function StarterLayout({
-+	children,
-+}: Readonly<{
-+	children: React.ReactNode
-+}>) {
-+	return (
-+		<>
-+			{children}
-+			<PrismicPreview repositoryName={repositoryName} />
-+		</>
-+	)
-+}
-diff --git a/src/app/page.tsx b/src/app/(starter)/page.tsx
+diff --git a/src/app/[[...lang]]/layout.tsx b/src/app/(starter)/[[...lang]]/layout.tsx
 similarity index 100%
-rename from src/app/page.tsx
-rename to src/app/(starter)/page.tsx
+rename from src/app/[[...lang]]/layout.tsx
+rename to src/app/(starter)/[[...lang]]/layout.tsx
+diff --git a/src/app/[[...lang]]/page.tsx b/src/app/(starter)/[[...lang]]/page.tsx
+similarity index 100%
+rename from src/app/[[...lang]]/page.tsx
+rename to src/app/(starter)/[[...lang]]/page.tsx
+diff --git a/src/app/slice-simulator/layout.tsx b/src/app/(starter)/slice-simulator/layout.tsx
+similarity index 100%
+rename from src/app/slice-simulator/layout.tsx
+rename to src/app/(starter)/slice-simulator/layout.tsx
 diff --git a/src/app/slice-simulator/page.tsx b/src/app/(starter)/slice-simulator/page.tsx
 similarity index 100%
 rename from src/app/slice-simulator/page.tsx
 rename to src/app/(starter)/slice-simulator/page.tsx
+diff --git a/src/app/[tenant]/[[...lang]]/layout.tsx b/src/app/[tenant]/[[...lang]]/layout.tsx
+new file mode 100644
+index 0000000..b9ba329
+--- /dev/null
++++ b/src/app/[tenant]/[[...lang]]/layout.tsx
+@@ -0,0 +1,40 @@
++import { PrismicPreview } from "@prismicio/next"
++import { Inter } from "next/font/google"
++import { notFound } from "next/navigation"
++
++import { resolveLocaleFromSegments } from "@/lib/locales"
++
++const inter = Inter({
++	subsets: ["latin"],
++	display: "swap",
++	variable: "--font-inter-family",
++})
++
++/**
++ * A root layout (see `src/app/(starter)/[[...lang]]/layout.tsx` for why),
++ * scoped to the tenant's own Prismic repository instead of the one
++ * configured in `prismic.config.json`.
++ */
++export default async function TenantLocaleLayout(
++	props: LayoutProps<"/[tenant]/[[...lang]]">,
++) {
++	const { children } = props
++	const { tenant, lang } = await props.params
++
++	const locale = resolveLocaleFromSegments(lang)
++	if (!locale) notFound()
++
++	const [repo] = tenant.split("~")
++
++	return (
++		<html lang={locale.code} className={inter.variable}>
++			<body className="font-sans bg-white text-[#0d0d0d] antialiased selection:bg-black selection:text-white">
++				<main className="min-h-screen">{children}</main>
++				<PrismicPreview
++					repositoryName={repo}
++					updatePreviewURL={`/${tenant}/api/preview`}
++				/>
++			</body>
++		</html>
++	)
++}
+diff --git a/src/app/[tenant]/[[...lang]]/page.tsx b/src/app/[tenant]/[[...lang]]/page.tsx
+new file mode 100644
+index 0000000..78c32c1
+--- /dev/null
++++ b/src/app/[tenant]/[[...lang]]/page.tsx
+@@ -0,0 +1,45 @@
++import { type Metadata } from "next"
++
++import { SliceZone } from "@prismicio/react"
++import { notFound } from "next/navigation"
++
++import { Footer } from "@/components/Footer"
++import { LocaleSwitcher } from "@/components/LocaleSwitcher"
++import { resolveLocaleFromSegments } from "@/lib/locales"
++import { createClient } from "@/prismicio.tenant"
++import { components } from "@/slices"
++
++export default async function Home(props: PageProps<"/[tenant]/[[...lang]]">) {
++	const { tenant, lang } = await props.params
++
++	const locale = resolveLocaleFromSegments(lang)
++	if (!locale) notFound()
++
++	const client = createClient(tenant)
++	const page = await client.getSingle("homepage", { lang: locale.code })
++
++	return (
++		<>
++			<LocaleSwitcher activeLocale={locale.code} basePath={`/${tenant}`} />
++			<SliceZone slices={page.data.slices} components={components} />
++			<Footer data={page.data} />
++		</>
++	)
++}
++
++export async function generateMetadata(
++	props: PageProps<"/[tenant]/[[...lang]]">,
++): Promise<Metadata> {
++	const { tenant, lang } = await props.params
++
++	const locale = resolveLocaleFromSegments(lang)
++	if (!locale) notFound()
++
++	const client = createClient(tenant)
++	const page = await client.getSingle("homepage", { lang: locale.code })
++
++	return {
++		title: page.data.meta_title,
++		description: page.data.meta_description,
++	}
++}
 diff --git a/src/app/[tenant]/api/preview/route.ts b/src/app/[tenant]/api/preview/route.ts
 new file mode 100644
-index 0000000..4fe8e68
+index 0000000..5f68457
 --- /dev/null
 +++ b/src/app/[tenant]/api/preview/route.ts
-@@ -0,0 +1,14 @@
+@@ -0,0 +1,16 @@
 +import { redirectToPreviewURL } from "@prismicio/next"
 +import { NextRequest } from "next/server"
 +
++import { createLinkResolver } from "@/lib/linkResolver"
 +import { createClient } from "@/prismicio.tenant"
 +
 +export async function GET(
@@ -44,89 +129,10 @@ index 0000000..4fe8e68
 +) {
 +	const { tenant } = await context.params
 +	const client = createClient(tenant)
++	const linkResolver = createLinkResolver(`/${tenant}`)
 +
-+	return await redirectToPreviewURL({ client, request })
++	return await redirectToPreviewURL({ client, request, linkResolver })
 +}
-diff --git a/src/app/[tenant]/layout.tsx b/src/app/[tenant]/layout.tsx
-new file mode 100644
-index 0000000..0e9c80c
---- /dev/null
-+++ b/src/app/[tenant]/layout.tsx
-@@ -0,0 +1,16 @@
-+import { PrismicPreview } from "@prismicio/next"
-+
-+export default async function TenantLayout(props: LayoutProps<"/[tenant]">) {
-+	const { tenant } = await props.params
-+	const [repo] = tenant.split("~")
-+
-+	return (
-+		<>
-+			{props.children}
-+			<PrismicPreview
-+				repositoryName={repo}
-+				updatePreviewURL={`/${tenant}/api/preview`}
-+			/>
-+		</>
-+	)
-+}
-diff --git a/src/app/[tenant]/page.tsx b/src/app/[tenant]/page.tsx
-new file mode 100644
-index 0000000..edc85b4
---- /dev/null
-+++ b/src/app/[tenant]/page.tsx
-@@ -0,0 +1,33 @@
-+import { type Metadata } from "next"
-+
-+import { SliceZone } from "@prismicio/react"
-+
-+import { Footer } from "@/components/Footer"
-+import { createClient } from "@/prismicio.tenant"
-+import { components } from "@/slices"
-+
-+export default async function Home(props: PageProps<"/[tenant]">) {
-+	const { tenant } = await props.params
-+	const client = createClient(tenant)
-+	const page = await client.getSingle("homepage")
-+
-+	return (
-+		<>
-+			<SliceZone slices={page.data.slices} components={components} />
-+			<Footer data={page.data} />
-+		</>
-+	)
-+}
-+
-+export async function generateMetadata(
-+	props: PageProps<"/[tenant]">,
-+): Promise<Metadata> {
-+	const { tenant } = await props.params
-+	const client = createClient(tenant)
-+	const page = await client.getSingle("homepage")
-+
-+	return {
-+		title: page.data.meta_title,
-+		description: page.data.meta_description,
-+	}
-+}
-diff --git a/src/app/layout.tsx b/src/app/layout.tsx
-index 4e6b6bb..5f005ee 100644
---- a/src/app/layout.tsx
-+++ b/src/app/layout.tsx
-@@ -1,6 +1,4 @@
- import "@/app/globals.css"
--import { repositoryName } from "@/prismicio"
--import { PrismicPreview } from "@prismicio/next"
- import { Inter } from "next/font/google"
- 
- const inter = Inter({
-@@ -18,7 +16,6 @@ export default function RootLayout({
- 		<html lang="en" className={inter.variable}>
- 			<body className="font-sans bg-white text-[#0d0d0d] antialiased selection:bg-black selection:text-white">
- 				<main className="min-h-screen">{children}</main>
--				<PrismicPreview repositoryName={repositoryName} />
- 			</body>
- 		</html>
- 	)
 diff --git a/src/prismicio.tenant.ts b/src/prismicio.tenant.ts
 new file mode 100644
 index 0000000..f37bbdc
