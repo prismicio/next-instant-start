@@ -5,6 +5,12 @@ import { locales, localePath } from "@/lib/locales"
 interface LocaleSwitcherProps {
 	/** The locale code currently being viewed. */
 	activeLocale: string
+	/**
+	 * Prefixed onto every locale's path. Used by the multi-tenant instant
+	 * preview deployment, where the homepage lives under `/[tenant]`
+	 * instead of at the site root.
+	 */
+	basePath?: string
 }
 
 /**
@@ -14,7 +20,7 @@ interface LocaleSwitcherProps {
  * for why that check was left out.
  */
 export function LocaleSwitcher(props: LocaleSwitcherProps) {
-	const { activeLocale } = props
+	const { activeLocale, basePath = "" } = props
 
 	return (
 		<nav aria-label="Language" className="flex justify-end gap-3 py-4">
@@ -26,7 +32,7 @@ export function LocaleSwitcher(props: LocaleSwitcherProps) {
 								{locale.label}
 							</span>
 						:	<Link
-								href={localePath(locale.code)}
+								href={`${basePath}${localePath(locale.code)}`}
 								className="underline-offset-4 hover:underline"
 							>
 								{locale.label}
