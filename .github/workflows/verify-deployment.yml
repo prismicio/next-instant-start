@@ -25,6 +25,15 @@ jobs:
       - name: Install starter dependencies
         run: npm ci
 
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+
+      - name: Lint clean starter
+        run: npm run lint
+
+      - name: Build clean starter
+        run: npm run build
+
       - name: Apply instant preview patch
         run: bash ./.deployment/instant-preview/patch-apply.sh .
 
