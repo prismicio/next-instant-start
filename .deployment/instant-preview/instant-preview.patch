@@ -1,41 +1,175 @@
-diff --git a/src/app/(starter)/layout.tsx b/src/app/(starter)/layout.tsx
-new file mode 100644
-index 0000000..9cd56a7
---- /dev/null
-+++ b/src/app/(starter)/layout.tsx
-@@ -0,0 +1,15 @@
-+import { repositoryName } from "@/prismicio"
-+import { PrismicPreview } from "@prismicio/next"
-+
-+export default function StarterLayout({
-+	children,
-+}: Readonly<{
-+	children: React.ReactNode
-+}>) {
-+	return (
-+		<>
-+			{children}
-+			<PrismicPreview repositoryName={repositoryName} />
-+		</>
-+	)
-+}
-diff --git a/src/app/page.tsx b/src/app/(starter)/page.tsx
+diff --git a/src/app/[[...lang]]/layout.tsx b/src/app/(starter)/locale/[[...lang]]/layout.tsx
+similarity index 97%
+rename from src/app/[[...lang]]/layout.tsx
+rename to src/app/(starter)/locale/[[...lang]]/layout.tsx
+index f058d31..b061d04 100644
+--- a/src/app/[[...lang]]/layout.tsx
++++ b/src/app/(starter)/locale/[[...lang]]/layout.tsx
+@@ -23,7 +23,7 @@ const inter = Inter({
+  * `lang` segment should 404 before `<html>` is even rendered.
+  */
+ export default async function LocaleLayout(
+-	props: LayoutProps<"/[[...lang]]">,
++	props: LayoutProps<"/locale/[[...lang]]">,
+ ) {
+ 	const { children } = props
+ 	const { lang } = await props.params
+diff --git a/src/app/[[...lang]]/page.tsx b/src/app/(starter)/locale/[[...lang]]/page.tsx
+similarity index 94%
+rename from src/app/[[...lang]]/page.tsx
+rename to src/app/(starter)/locale/[[...lang]]/page.tsx
+index d33c5c7..7f6e6b3 100644
+--- a/src/app/[[...lang]]/page.tsx
++++ b/src/app/(starter)/locale/[[...lang]]/page.tsx
+@@ -27,7 +27,7 @@ async function getHomepage(client: ReturnType<typeof createClient>, lang: string
+ 	}
+ }
+ 
+-export default async function Home(props: PageProps<"/[[...lang]]">) {
++export default async function Home(props: PageProps<"/locale/[[...lang]]">) {
+ 	const { lang } = await props.params
+ 
+ 	const locale = resolveLocaleFromSegments(lang)
+@@ -46,7 +46,7 @@ export default async function Home(props: PageProps<"/[[...lang]]">) {
+ }
+ 
+ export async function generateMetadata(
+-	props: PageProps<"/[[...lang]]">,
++	props: PageProps<"/locale/[[...lang]]">,
+ ): Promise<Metadata> {
+ 	const { lang } = await props.params
+ 
+diff --git a/src/app/slice-simulator/layout.tsx b/src/app/(starter)/slice-simulator/layout.tsx
 similarity index 100%
-rename from src/app/page.tsx
-rename to src/app/(starter)/page.tsx
+rename from src/app/slice-simulator/layout.tsx
+rename to src/app/(starter)/slice-simulator/layout.tsx
 diff --git a/src/app/slice-simulator/page.tsx b/src/app/(starter)/slice-simulator/page.tsx
 similarity index 100%
 rename from src/app/slice-simulator/page.tsx
 rename to src/app/(starter)/slice-simulator/page.tsx
+diff --git a/src/app/[tenant]/[[...lang]]/layout.tsx b/src/app/[tenant]/[[...lang]]/layout.tsx
+new file mode 100644
+index 0000000..96d4fe3
+--- /dev/null
++++ b/src/app/[tenant]/[[...lang]]/layout.tsx
+@@ -0,0 +1,41 @@
++import "@/app/globals.css"
++import { PrismicPreview } from "@prismicio/next"
++import { Inter } from "next/font/google"
++import { notFound } from "next/navigation"
++
++import { resolveLocaleFromSegments } from "@/lib/locales"
++
++const inter = Inter({
++	subsets: ["latin"],
++	display: "swap",
++	variable: "--font-inter-family",
++})
++
++/**
++ * A root layout (see `src/app/(starter)/locale/[[...lang]]/layout.tsx` for
++ * why), scoped to the tenant's own Prismic repository instead of the one
++ * configured in `prismic.config.json`.
++ */
++export default async function TenantLocaleLayout(
++	props: LayoutProps<"/[tenant]/[[...lang]]">,
++) {
++	const { children } = props
++	const { tenant, lang } = await props.params
++
++	const locale = resolveLocaleFromSegments(lang)
++	if (!locale) notFound()
++
++	const [repo] = tenant.split("~")
++
++	return (
++		<html lang={locale.code} className={inter.variable}>
++			<body className="font-sans bg-white text-[#0d0d0d] antialiased selection:bg-black selection:text-white">
++				<main className="min-h-screen">{children}</main>
++				<PrismicPreview
++					repositoryName={repo}
++					updatePreviewURL={`/${tenant}/api/preview`}
++				/>
++			</body>
++		</html>
++	)
++}
+diff --git a/src/app/[tenant]/[[...lang]]/page.tsx b/src/app/[tenant]/[[...lang]]/page.tsx
+new file mode 100644
+index 0000000..296880a
+--- /dev/null
++++ b/src/app/[tenant]/[[...lang]]/page.tsx
+@@ -0,0 +1,60 @@
++import { type Metadata } from "next"
++
++import { NotFoundError } from "@prismicio/client"
++import { SliceZone } from "@prismicio/react"
++import { notFound } from "next/navigation"
++
++import { Footer } from "@/components/Footer"
++import { LocaleSwitcher } from "@/components/LocaleSwitcher"
++import { resolveLocaleFromSegments } from "@/lib/locales"
++import { createClient } from "@/prismicio.tenant"
++import { components } from "@/slices"
++
++/**
++ * Fetches the `homepage` singleton for a given locale, treating a locale
++ * that has not been translated yet as a 404 rather than a server error
++ * (see `src/app/(starter)/locale/[[...lang]]/page.tsx` for why).
++ */
++async function getHomepage(client: ReturnType<typeof createClient>, lang: string) {
++	try {
++		return await client.getSingle("homepage", { lang })
++	} catch (error) {
++		if (error instanceof NotFoundError) notFound()
++		throw error
++	}
++}
++
++export default async function Home(props: PageProps<"/[tenant]/[[...lang]]">) {
++	const { tenant, lang } = await props.params
++
++	const locale = resolveLocaleFromSegments(lang)
++	if (!locale) notFound()
++
++	const client = createClient(tenant)
++	const page = await getHomepage(client, locale.code)
++
++	return (
++		<>
++			<LocaleSwitcher activeLocale={locale.code} basePath={`/${tenant}`} />
++			<SliceZone slices={page.data.slices} components={components} />
++			<Footer data={page.data} />
++		</>
++	)
++}
++
++export async function generateMetadata(
++	props: PageProps<"/[tenant]/[[...lang]]">,
++): Promise<Metadata> {
++	const { tenant, lang } = await props.params
++
++	const locale = resolveLocaleFromSegments(lang)
++	if (!locale) notFound()
++
++	const client = createClient(tenant)
++	const page = await getHomepage(client, locale.code)
++
++	return {
++		title: page.data.meta_title,
++		description: page.data.meta_description,
++	}
++}
 diff --git a/src/app/[tenant]/api/preview/route.ts b/src/app/[tenant]/api/preview/route.ts
 new file mode 100644
-index 0000000..4fe8e68
+index 0000000..5f68457
 --- /dev/null
 +++ b/src/app/[tenant]/api/preview/route.ts
-@@ -0,0 +1,14 @@
+@@ -0,0 +1,16 @@
 +import { redirectToPreviewURL } from "@prismicio/next"
 +import { NextRequest } from "next/server"
 +
++import { createLinkResolver } from "@/lib/linkResolver"
 +import { createClient } from "@/prismicio.tenant"
 +
 +export async function GET(
@@ -44,89 +178,10 @@ index 0000000..4fe8e68
 +) {
 +	const { tenant } = await context.params
 +	const client = createClient(tenant)
++	const linkResolver = createLinkResolver(`/${tenant}`)
 +
-+	return await redirectToPreviewURL({ client, request })
++	return await redirectToPreviewURL({ client, request, linkResolver })
 +}
-diff --git a/src/app/[tenant]/layout.tsx b/src/app/[tenant]/layout.tsx
-new file mode 100644
-index 0000000..0e9c80c
---- /dev/null
-+++ b/src/app/[tenant]/layout.tsx
-@@ -0,0 +1,16 @@
-+import { PrismicPreview } from "@prismicio/next"
-+
-+export default async function TenantLayout(props: LayoutProps<"/[tenant]">) {
-+	const { tenant } = await props.params
-+	const [repo] = tenant.split("~")
-+
-+	return (
-+		<>
-+			{props.children}
-+			<PrismicPreview
-+				repositoryName={repo}
-+				updatePreviewURL={`/${tenant}/api/preview`}
-+			/>
-+		</>
-+	)
-+}
-diff --git a/src/app/[tenant]/page.tsx b/src/app/[tenant]/page.tsx
-new file mode 100644
-index 0000000..edc85b4
---- /dev/null
-+++ b/src/app/[tenant]/page.tsx
-@@ -0,0 +1,33 @@
-+import { type Metadata } from "next"
-+
-+import { SliceZone } from "@prismicio/react"
-+
-+import { Footer } from "@/components/Footer"
-+import { createClient } from "@/prismicio.tenant"
-+import { components } from "@/slices"
-+
-+export default async function Home(props: PageProps<"/[tenant]">) {
-+	const { tenant } = await props.params
-+	const client = createClient(tenant)
-+	const page = await client.getSingle("homepage")
-+
-+	return (
-+		<>
-+			<SliceZone slices={page.data.slices} components={components} />
-+			<Footer data={page.data} />
-+		</>
-+	)
-+}
-+
-+export async function generateMetadata(
-+	props: PageProps<"/[tenant]">,
-+): Promise<Metadata> {
-+	const { tenant } = await props.params
-+	const client = createClient(tenant)
-+	const page = await client.getSingle("homepage")
-+
-+	return {
-+		title: page.data.meta_title,
-+		description: page.data.meta_description,
-+	}
-+}
-diff --git a/src/app/layout.tsx b/src/app/layout.tsx
-index 4e6b6bb..5f005ee 100644
---- a/src/app/layout.tsx
-+++ b/src/app/layout.tsx
-@@ -1,6 +1,4 @@
- import "@/app/globals.css"
--import { repositoryName } from "@/prismicio"
--import { PrismicPreview } from "@prismicio/next"
- import { Inter } from "next/font/google"
- 
- const inter = Inter({
-@@ -18,7 +16,6 @@ export default function RootLayout({
- 		<html lang="en" className={inter.variable}>
- 			<body className="font-sans bg-white text-[#0d0d0d] antialiased selection:bg-black selection:text-white">
- 				<main className="min-h-screen">{children}</main>
--				<PrismicPreview repositoryName={repositoryName} />
- 			</body>
- 		</html>
- 	)
 diff --git a/src/prismicio.tenant.ts b/src/prismicio.tenant.ts
 new file mode 100644
 index 0000000..f37bbdc
@@ -174,4 +229,49 @@ index 0000000..f37bbdc
 +	enableAutoPreviews({ client })
 +
 +	return client
++}
+diff --git a/src/proxy.ts b/src/proxy.ts
+new file mode 100644
+index 0000000..f1cfbec
+--- /dev/null
++++ b/src/proxy.ts
+@@ -0,0 +1,39 @@
++import { NextResponse, type NextRequest } from "next/server"
++
++import { locales } from "@/lib/locales"
++
++/**
++ * `(starter)/locale/[[...lang]]` and `[tenant]/[[...lang]]` both resolve a
++ * single first path segment (e.g. `/nl-nl`), but Next.js's file-system
++ * router always prefers a plain dynamic segment (`[tenant]`) over an
++ * optional catch-all (`[[...lang]]`) at the same level, and there is no way
++ * to make the router prefer the catch-all instead. Left alone, any request
++ * whose first segment happens to match one of the starter's locale codes
++ * would be resolved as a tenant id instead of a starter locale, breaking
++ * the locale switcher on this deployment.
++ *
++ * Locale codes are therefore reserved words on this deployment: a request
++ * for `/` or for a first segment that matches a configured locale code is
++ * rewritten to the starter's `/locale` mount point (see
++ * `src/app/(starter)/locale/[[...lang]]`), which the router can resolve
++ * unambiguously because `locale` is a static segment. Every other request
++ * (including the starter's other static routes, like `/slice-simulator`,
++ * which already win over `[tenant]` without any help) passes through
++ * untouched and is resolved as a tenant id.
++ */
++const RESERVED_LOCALE_SEGMENTS = new Set(locales.map((locale) => locale.code))
++
++export function proxy(request: NextRequest) {
++	const { pathname } = request.nextUrl
++	const [firstSegment] = pathname.split("/").filter(Boolean)
++
++	if (!firstSegment || RESERVED_LOCALE_SEGMENTS.has(firstSegment)) {
++		const url = request.nextUrl.clone()
++		url.pathname = `/locale${pathname === "/" ? "" : pathname}`
++		return NextResponse.rewrite(url)
++	}
++}
++
++export const config = {
++	matcher: ["/((?!_next|api|.*\\..*).*)"],
 +}
