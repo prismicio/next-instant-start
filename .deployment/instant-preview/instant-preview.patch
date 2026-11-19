@@ -132,7 +132,7 @@ new file mode 100644
 index 0000000..f37bbdc
 --- /dev/null
 +++ b/src/prismicio.tenant.ts
-@@ -0,0 +1,42 @@
+@@ -0,0 +1,45 @@
 +import {
 +	createClient as baseCreateClient,
 +	type ClientConfig,
@@ -142,8 +142,11 @@ index 0000000..f37bbdc
 +
 +import prismicConfig from "../prismic.config.json"
 +
++const DEFAULT_HOST = process.env.NEXT_PUBLIC_PRISMIC_DOMAIN || "prismic.io"
++
 +const ALLOWED_HOSTS = [
 +	"prismic.io",
++	"eu.prismic.io",
 +	"wroom.io",
 +	"wroom.test",
 +	"dev-tools-wroom.com",
@@ -154,7 +157,7 @@ index 0000000..f37bbdc
 +
 +export const createClient = (tenant: string, config: ClientConfig = {}) => {
 +	const [repo, ...rest] = tenant.split("~")
-+	const host = rest.join(".") || "prismic.io"
++	const host = rest.join(".") || DEFAULT_HOST
 +	if (!repo || !ALLOWED_HOSTS.includes(host)) notFound()
 +
 +	const client = baseCreateClient(repo, {
