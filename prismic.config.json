@@ -5,7 +5,18 @@
 	"routes": [
 		{
 			"type": "homepage",
+			"lang": "en-us",
 			"path": "/"
+		},
+		{
+			"type": "homepage",
+			"lang": "nl-nl",
+			"path": "/nl-nl"
+		},
+		{
+			"type": "homepage",
+			"lang": "fr-fr",
+			"path": "/fr-fr"
 		}
 	]
 }

@@ -9,7 +9,12 @@ const inter = Inter({
 	variable: "--font-inter-family",
 })
 
-export default function RootLayout({
+/**
+ * A separate root layout (see `src/app/[[...lang]]/layout.tsx` for why).
+ * The slice simulator is a Slice Machine dev tool, not a locale-aware
+ * content page, so its `<html lang>` doesn't need to vary.
+ */
+export default function SliceSimulatorLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode
